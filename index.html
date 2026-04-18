@@ -1,0 +1,1862 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Prototipo Interactivo — La Corte Dice Tributaria (Rediseño 2026)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  /* =========================================================
+     PALETA ORIGINAL (tomada de src/app.css)
+     ========================================================= */
+  :root{
+    --primary-50:  #fefaec;
+    --primary-100: #f8f4e3;
+    --primary-200: #f5ecc9;
+    --primary-300: #edd99b;
+    --primary-400: #e8c968;
+    --primary-500: #e2bc34;  /* mostaza principal */
+    --primary-600: #d1a92f;
+    --primary-700: #b49a3a;  /* usado en header de filtros */
+    --primary-800: #8b7628;
+    --primary-900: #b49a3a;  /* usado como primary-900 en Tailwind original */
+    --secondary:   #000000;
+    --instancia:   #505c9a;  /* violeta azulado para instancias */
+    --casacion:    #c09a2b;  /* dorado oscuro para casaciones */
+    --bg:          #fafaf7;
+    --ink:         #1a1a1a;
+    --muted:       #6b6b6b;
+    --line:        #e5e5e5;
+    --soft:        #f5f5f0;
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    font-family:'Inter', system-ui, -apple-system, sans-serif;
+    color:var(--ink);
+    background:var(--bg);
+    -webkit-font-smoothing:antialiased;
+  }
+  button{ font-family:inherit; cursor:pointer; }
+  a{ color:inherit; }
+
+  /* =========================================================
+     HEADER (estilo original: bg negro translúcido + búho dorado)
+     ========================================================= */
+  .header{
+    background: rgba(0,0,0,0.88);
+    backdrop-filter: blur(8px);
+    position:sticky; top:0; z-index:40;
+    border-bottom:1px solid rgba(228,188,52,0.15);
+  }
+  .header-inner{
+    max-width:1400px; margin:0 auto;
+    display:flex; align-items:center; justify-content:space-between;
+    padding:14px 28px;
+  }
+  .brand{ display:flex; align-items:center; gap:12px; cursor:pointer; }
+  .brand svg{ width:38px; height:50px; }
+  .brand-text{ color:#fff; }
+  .brand-text .title{ font-weight:700; font-size:14px; letter-spacing:.5px; color:#fff; line-height:1.1; }
+  .brand-text .sub{ font-size:11px; color:var(--primary-500); letter-spacing:1.5px; text-transform:uppercase; }
+  .nav{ display:flex; align-items:center; gap:28px; }
+  .nav a{
+    color:#fff; text-decoration:none; font-size:13.5px; font-weight:500;
+    padding:8px 2px; border-bottom:2px solid transparent; transition:all .2s;
+  }
+  .nav a:hover, .nav a.active{ color:var(--primary-500); border-bottom-color:var(--primary-500); }
+  .user-chip{
+    display:flex; align-items:center; gap:10px;
+    background:rgba(228,188,52,0.12); padding:6px 14px 6px 6px; border-radius:999px;
+    color:#fff; font-size:12.5px; font-weight:500;
+  }
+  .avatar{
+    width:30px; height:30px; border-radius:50%;
+    background:linear-gradient(135deg,var(--primary-500),var(--primary-700));
+    display:flex; align-items:center; justify-content:center;
+    color:#000; font-weight:700; font-size:12px;
+  }
+
+  /* =========================================================
+     HOME VIEW
+     ========================================================= */
+  .view{ display:none; }
+  .view.active{ display:block; }
+
+  .hero{
+    background: linear-gradient(180deg, #faf6e8 0%, #fafaf7 100%);
+    padding:64px 28px 48px;
+    border-bottom:1px solid var(--line);
+  }
+  .hero-inner{ max-width:1100px; margin:0 auto; text-align:center; }
+  .hero-eyebrow{
+    display:inline-block;
+    font-size:11px; font-weight:700; letter-spacing:2px;
+    color:var(--primary-700); text-transform:uppercase;
+    background:var(--primary-100); padding:6px 14px; border-radius:999px;
+    margin-bottom:20px;
+  }
+  .hero h1{
+    font-size:44px; line-height:1.1; font-weight:800; margin:0 0 14px;
+    color:var(--secondary);
+  }
+  .hero h1 span{ color:var(--primary-700); }
+  .hero p{
+    font-size:17px; color:var(--muted); max-width:680px;
+    margin:0 auto 32px; line-height:1.6;
+  }
+  .hero-search{
+    max-width:680px; margin:0 auto;
+    background:#fff; border:2px solid var(--primary-500);
+    border-radius:14px; padding:6px 6px 6px 20px;
+    display:flex; align-items:center; gap:10px;
+    box-shadow:0 10px 40px rgba(228,188,52,0.18);
+  }
+  .hero-search input{
+    flex:1; border:0; outline:0; font-size:15px; color:var(--ink);
+    background:transparent; padding:14px 0;
+  }
+  .hero-search button{
+    background:var(--secondary); color:#fff; border:0; border-radius:10px;
+    padding:12px 24px; font-weight:600; font-size:14px;
+    transition:all .2s;
+  }
+  .hero-search button:hover{ background:var(--primary-700); color:#000; }
+  .hero-chips{ margin-top:20px; display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+  .hero-chips span{ color:var(--muted); font-size:12.5px; align-self:center; }
+  .hero-chips button{
+    background:#fff; border:1px solid var(--line); border-radius:999px;
+    padding:6px 14px; font-size:12.5px; color:var(--ink);
+    transition:all .2s;
+  }
+  .hero-chips button:hover{ border-color:var(--primary-500); background:var(--primary-50); }
+
+  .stats{
+    display:grid; grid-template-columns:repeat(4,1fr);
+    max-width:1100px; margin:-24px auto 48px; padding:0 28px;
+    gap:16px;
+  }
+  .stat{
+    background:#fff; border:1px solid var(--line); border-radius:12px;
+    padding:22px; display:flex; align-items:center; gap:14px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.04);
+  }
+  .stat-icon{
+    width:44px; height:44px; border-radius:10px;
+    background:var(--primary-100); display:flex; align-items:center; justify-content:center;
+    font-size:22px;
+  }
+  .stat-num{ font-size:22px; font-weight:800; color:var(--secondary); line-height:1; }
+  .stat-lbl{ font-size:12px; color:var(--muted); margin-top:4px; }
+
+  .section{ max-width:1200px; margin:0 auto; padding:0 28px 64px; }
+  .section-head{
+    display:flex; align-items:end; justify-content:space-between;
+    margin-bottom:22px;
+  }
+  .section-head h2{
+    font-size:22px; font-weight:700; color:var(--secondary); margin:0 0 4px;
+  }
+  .section-head p{ font-size:14px; color:var(--muted); margin:0; }
+
+  .entities{
+    display:grid; grid-template-columns:repeat(3,1fr); gap:20px;
+  }
+  .entity-card{
+    background:#fff; border:1px solid var(--line); border-radius:14px;
+    padding:26px; transition:all .25s; cursor:default;
+    border-top:4px solid var(--primary-500);
+  }
+  .entity-card:hover{ box-shadow:0 12px 36px rgba(0,0,0,0.08); transform:translateY(-2px); }
+  .entity-head{ display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; }
+  .entity-head h3{
+    font-size:24px; font-weight:800; margin:0; color:var(--secondary);
+    letter-spacing:-0.5px;
+  }
+  .entity-head .count{
+    background:var(--primary-100); color:var(--primary-800);
+    font-size:11px; font-weight:700; padding:4px 10px; border-radius:999px;
+  }
+  .entity-links{ display:flex; flex-direction:column; gap:2px; }
+  .entity-links a{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 12px; border-radius:8px; font-size:13.5px;
+    text-decoration:none; color:var(--ink); transition:all .15s;
+    cursor:pointer;
+  }
+  .entity-links a:hover{ background:var(--primary-50); color:var(--primary-800); }
+  .entity-links a .arrow{ color:var(--muted); font-size:14px; }
+  .entity-links a:hover .arrow{ color:var(--primary-700); }
+  .entity-links a.ver-todos{
+    margin-top:8px; border-top:1px dashed var(--line); padding-top:12px;
+    font-weight:600; color:var(--primary-800);
+  }
+
+  /* =========================================================
+     BUSCADOR VIEW
+     ========================================================= */
+  .search-shell{
+    display:grid; grid-template-columns:288px 1fr;
+    max-width:1400px; margin:0 auto;
+    min-height:calc(100vh - 78px);
+  }
+
+  /* --- Sidebar (réplica fiel de FilterSidebar.svelte) --- */
+  .sidebar{
+    background:#fff; border-right:1px solid var(--line);
+    display:flex; flex-direction:column;
+  }
+  .sidebar-head{
+    background:var(--primary-700);
+    padding:14px 18px;
+    display:flex; align-items:center; justify-content:space-between;
+  }
+  .sidebar-head h5{
+    color:#fff; font-size:13px; font-weight:700; letter-spacing:1.5px;
+    text-transform:uppercase; margin:0;
+  }
+  .sidebar-head .clear{
+    background:rgba(255,255,255,0.18); color:#fff; border:0;
+    padding:4px 10px; border-radius:6px; font-size:11px; font-weight:500;
+  }
+  .sidebar-head .clear:hover{ background:rgba(255,255,255,0.3); }
+
+  .tabs{
+    display:flex; border-bottom:1px solid var(--line);
+    background:#fff;
+  }
+  .tab{
+    flex:1; padding:12px 0; border:0; background:transparent;
+    font-size:13px; font-weight:600; color:var(--muted);
+    border-bottom:2px solid transparent; transition:all .2s;
+  }
+  .tab.active{ color:var(--primary-800); border-bottom-color:var(--primary-700); }
+  .sidebar-body{ padding:14px 16px 32px; overflow-y:auto; flex:1; }
+  .panel{ display:none; }
+  .panel.active{ display:block; }
+
+  .field{ margin-bottom:14px; }
+  .field label{
+    display:block; font-size:11px; font-weight:600; color:var(--ink);
+    margin-bottom:5px; letter-spacing:.2px;
+  }
+  .field input[type="text"],
+  .field input[type="number"],
+  .field input[type="date"],
+  .field select{
+    width:100%; padding:7px 10px; font-size:12.5px;
+    border:1px solid var(--line); border-radius:6px;
+    background:#fff; color:var(--ink);
+    font-family:inherit; outline:none;
+    transition:all .15s;
+  }
+  .field input:focus, .field select:focus{
+    border-color:var(--primary-500);
+    box-shadow:0 0 0 3px rgba(228,188,52,0.15);
+  }
+  .field input:disabled, .field select:disabled{
+    background:#f5f5f5; color:#999; cursor:not-allowed;
+  }
+  .field-row{ display:flex; gap:8px; align-items:center; }
+  .field-row input{ flex:1; }
+  .field-row .dash{ color:var(--muted); font-size:11px; }
+
+  .search-box{ position:relative; }
+  .search-box input{ padding-left:28px; }
+  .search-box::before{
+    content:"🔍"; position:absolute; left:8px; top:50%;
+    transform:translateY(-50%); font-size:11px; opacity:.5;
+  }
+
+  .cat-header{
+    font-size:11px; font-weight:600; color:var(--ink);
+    margin:8px 0 6px; display:flex; align-items:center; gap:6px;
+  }
+  .cat-list{ max-height:260px; overflow-y:auto; padding-right:4px; }
+  .cat-item{ display:flex; align-items:center; gap:6px; padding:3px 0; }
+  .cat-item input[type="checkbox"]{ width:13px; height:13px; accent-color:var(--primary-700); }
+  .cat-item label{ font-size:12px; color:var(--ink); cursor:pointer; margin:0; font-weight:400; letter-spacing:0;}
+  .cat-child{ margin-left:20px; }
+
+  /* --- Resultados --- */
+  .results{ padding:24px 28px 60px; }
+  .results-head{
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:18px; flex-wrap:wrap; gap:12px;
+  }
+  .crumb{ font-size:12.5px; color:var(--muted); display:flex; gap:6px; align-items:center; }
+  .crumb a{ color:var(--primary-800); text-decoration:none; cursor:pointer; font-weight:500; }
+  .crumb a:hover{ text-decoration:underline; }
+  .crumb strong{ color:var(--ink); font-weight:500; }
+
+  .results-count{ font-size:22px; font-weight:700; color:var(--secondary); margin:0; }
+  .results-count span{ color:var(--primary-700); }
+  .results-sort{
+    display:flex; gap:10px; align-items:center; font-size:12.5px; color:var(--muted);
+  }
+  .results-sort select{
+    padding:6px 10px; font-size:12.5px; border:1px solid var(--line);
+    border-radius:6px; background:#fff; font-family:inherit;
+  }
+
+  .active-filters{
+    display:flex; gap:8px; flex-wrap:wrap; margin-bottom:18px; align-items:center;
+  }
+  .active-filters .lbl{ font-size:12px; color:var(--muted); }
+  .chip{
+    display:inline-flex; align-items:center; gap:6px;
+    background:var(--primary-100); color:var(--primary-800);
+    padding:5px 10px; border-radius:999px; font-size:12px; font-weight:500;
+  }
+  .chip button{
+    background:transparent; border:0; color:var(--primary-800);
+    font-size:14px; line-height:1; padding:0 0 0 2px; cursor:pointer;
+  }
+  .chip button:hover{ color:#000; }
+
+  .result-card{
+    background:#fff; border:1px solid var(--line); border-radius:12px;
+    padding:20px 22px; margin-bottom:14px;
+    transition:all .2s; cursor:pointer;
+    border-left:4px solid transparent;
+  }
+  .result-card:hover{
+    border-color:var(--primary-500);
+    border-left-color:var(--primary-500);
+    box-shadow:0 8px 24px rgba(0,0,0,0.06);
+    transform:translateX(2px);
+  }
+  .result-card.is-casacion{ border-left-color:var(--casacion); }
+  .result-card.is-instancia{ border-left-color:var(--instancia); }
+
+  .rc-top{ display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; flex-wrap:wrap; gap:8px; }
+  .rc-badges{ display:flex; gap:6px; align-items:center; flex-wrap:wrap; }
+  .badge{
+    font-size:10.5px; font-weight:700; padding:3px 9px; border-radius:4px;
+    text-transform:uppercase; letter-spacing:.5px;
+  }
+  .badge.instancia{ background:#e7eaf5; color:var(--instancia); }
+  .badge.casacion { background:#f4ebc9; color:var(--casacion); }
+  .badge.entidad  { background:#fff; color:var(--muted); border:1px solid var(--line); font-weight:600; }
+  .rc-date{ font-size:12px; color:var(--muted); }
+
+  .rc-juicio{
+    font-family:'JetBrains Mono', 'SF Mono', 'Courier New', monospace;
+    font-size:15px; font-weight:700; color:var(--secondary);
+    margin:4px 0 8px; letter-spacing:.2px;
+  }
+  .rc-juez{ font-size:13px; color:var(--ink); margin-bottom:10px; }
+  .rc-juez strong{ color:var(--muted); font-weight:500; font-size:12px; }
+
+  .rc-preview{
+    font-size:13px; color:var(--muted); line-height:1.55;
+    display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical;
+    overflow:hidden;
+  }
+  .rc-foot{
+    margin-top:12px; padding-top:12px; border-top:1px solid #f0f0ee;
+    display:flex; align-items:center; justify-content:space-between;
+    font-size:12px;
+  }
+  .rc-meta{ display:flex; gap:16px; color:var(--muted); flex-wrap:wrap; }
+  .rc-meta span strong{ color:var(--ink); font-weight:600; }
+  .rc-decision{
+    font-weight:600; padding:3px 10px; border-radius:4px; font-size:11.5px;
+  }
+  .rc-decision.acepta   { background:#e7f5ea; color:#206b3a; }
+  .rc-decision.niega    { background:#fdecea; color:#a02b2b; }
+  .rc-decision.parcial  { background:#fff6e0; color:#8b6914; }
+  .rc-decision.inadmite { background:#f2f2f2; color:#555; }
+  .rc-decision.pendiente{ background:#eceff3; color:#4a5568; }
+
+  .no-results{
+    background:#fff; border:1px dashed var(--line); border-radius:12px;
+    padding:48px 24px; text-align:center; color:var(--muted);
+  }
+  .no-results h3{ font-size:16px; color:var(--ink); margin:8px 0; font-weight:600; }
+
+  /* =========================================================
+     DETALLE VIEW
+     ========================================================= */
+  .detail-shell{ max-width:1150px; margin:0 auto; padding:24px 28px 64px; }
+  .detail-head{
+    background:#fff; border:1px solid var(--line); border-radius:14px;
+    padding:24px 28px; margin-bottom:18px;
+    border-top:4px solid var(--primary-500);
+  }
+  .detail-head .crumb{ margin-bottom:14px; }
+  .detail-head h1{
+    font-family:'JetBrains Mono','SF Mono','Courier New',monospace;
+    font-size:24px; font-weight:800; margin:4px 0 8px; color:var(--secondary);
+    letter-spacing:.5px;
+  }
+  .detail-meta{ display:flex; gap:22px; flex-wrap:wrap; font-size:13px; color:var(--muted); margin-bottom:14px; }
+  .detail-meta strong{ color:var(--ink); font-weight:600; }
+  .detail-actions{ display:flex; gap:8px; flex-wrap:wrap; }
+  .btn{
+    padding:9px 16px; border-radius:8px; border:1px solid var(--line);
+    background:#fff; font-size:13px; font-weight:500; color:var(--ink);
+    display:inline-flex; align-items:center; gap:6px; transition:all .2s;
+  }
+  .btn:hover{ background:var(--primary-50); border-color:var(--primary-500); }
+  .btn.primary{ background:var(--secondary); color:#fff; border-color:var(--secondary); }
+  .btn.primary:hover{ background:var(--primary-700); color:#000; border-color:var(--primary-700); }
+
+  .detail-grid{
+    display:grid; grid-template-columns:1fr 300px; gap:18px;
+  }
+  @media (max-width:900px){
+    .detail-grid{ grid-template-columns:1fr; }
+    .entities{ grid-template-columns:1fr; }
+    .stats{ grid-template-columns:repeat(2,1fr); }
+    .search-shell{ grid-template-columns:1fr; }
+    .sidebar{ border-right:0; border-bottom:1px solid var(--line); }
+  }
+
+  .card{
+    background:#fff; border:1px solid var(--line); border-radius:12px;
+    padding:22px 24px; margin-bottom:14px;
+  }
+  .card h3{
+    font-size:13px; font-weight:700; text-transform:uppercase;
+    letter-spacing:1.5px; color:var(--primary-800);
+    margin:0 0 12px; display:flex; align-items:center; gap:8px;
+  }
+  .card h3::before{
+    content:""; width:4px; height:14px; background:var(--primary-500);
+    border-radius:2px;
+  }
+  .card p{ font-size:14px; line-height:1.7; color:var(--ink); margin:0 0 10px; }
+  .card ul{ margin:6px 0 0; padding-left:22px; font-size:14px; line-height:1.7; color:var(--ink); }
+
+  .info-row{
+    display:grid; grid-template-columns:180px 1fr; gap:8px;
+    padding:8px 0; border-bottom:1px solid #f3f3f0; font-size:13.5px;
+  }
+  .info-row:last-child{ border-bottom:0; }
+  .info-row .k{ color:var(--muted); font-weight:500; }
+  .info-row .v{ color:var(--ink); font-weight:500; }
+
+  .pill-list{ display:flex; flex-wrap:wrap; gap:6px; margin-top:4px;}
+  .pill{
+    background:var(--primary-100); color:var(--primary-800);
+    font-size:11.5px; font-weight:500; padding:4px 10px; border-radius:999px;
+  }
+  .pill.violet{ background:#e7eaf5; color:var(--instancia); }
+
+  .aside-card{
+    background:#fff; border:1px solid var(--line); border-radius:12px;
+    padding:18px 20px; margin-bottom:14px; position:sticky; top:90px;
+  }
+  .aside-card h4{
+    font-size:11.5px; text-transform:uppercase; letter-spacing:1.5px;
+    color:var(--muted); font-weight:600; margin:0 0 10px;
+  }
+  .decision-box{
+    padding:12px 14px; border-radius:10px;
+    font-size:13px; font-weight:600; line-height:1.4;
+    margin-bottom:14px;
+  }
+  .decision-box.acepta   { background:#e7f5ea; color:#206b3a; border:1px solid #c7e5d0; }
+  .decision-box.niega    { background:#fdecea; color:#a02b2b; border:1px solid #e8c8c5; }
+  .decision-box.parcial  { background:#fff6e0; color:#8b6914; border:1px solid #e9dfbd; }
+  .decision-box.inadmite { background:#f2f2f2; color:#555; border:1px solid #e0e0e0; }
+
+  .timeline{ font-size:12.5px; }
+  .timeline-item{
+    padding:6px 0 10px 18px; border-left:2px solid var(--primary-300);
+    margin-left:4px; position:relative;
+  }
+  .timeline-item::before{
+    content:""; position:absolute; left:-5px; top:8px;
+    width:8px; height:8px; border-radius:50%;
+    background:var(--primary-500);
+  }
+  .timeline-item .ti-date{ color:var(--muted); font-size:11.5px; }
+  .timeline-item .ti-text{ color:var(--ink); font-weight:500; }
+
+  .footer{
+    background:var(--secondary); color:#999; padding:34px 28px;
+    text-align:center; font-size:12.5px; margin-top:40px;
+  }
+  .footer strong{ color:var(--primary-500); }
+
+  /* Toggle prototype banner */
+  .proto-banner{
+    background:var(--primary-500); color:#000;
+    padding:8px 18px; font-size:12px; font-weight:600; text-align:center;
+    border-bottom:1px solid var(--primary-700);
+  }
+  .proto-banner span{ background:#000; color:var(--primary-500); padding:2px 8px; border-radius:4px; font-size:10px; margin-right:8px; letter-spacing:1px; }
+</style>
+</head>
+<body>
+
+<div class="proto-banner">
+  <span>PROTOTIPO</span>
+  Versión interactiva del rediseño 2026 · paleta y logos originales · datos de ejemplo navegables
+</div>
+
+<!-- ==========================================================
+     HEADER
+     ========================================================== -->
+<header class="header">
+  <div class="header-inner">
+    <div class="brand" onclick="goHome()">
+      <svg viewBox="0 0 69 92" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M34.57 91.185V76.496C15.553 76.687 1.641 61.851 1.641 43.766c0-18.085 14.713-32.782 32.787-32.782 18.074 0 32.793 14.703 32.793 32.782-.007 7.508-2.584 14.787-7.304 20.625l-.063.074L34.57 91.185zm4.715-19.997v7.513l16.992-17.317c4.049-4.977 6.248-11.203 6.223-17.618 0-15.479-12.592-28.073-28.071-28.073S6.355 28.287 6.355 43.766c0 15.479 12.772 30.439 32.93 27.422z" fill="#B49A3A"/>
+        <path d="M19.687 41.898c-1.791 0-3.543-.531-5.032-1.527-1.49-.995-2.65-2.41-3.336-4.065-.686-1.655-.866-3.477-.516-5.234.349-1.757 1.212-3.371 2.479-4.638 1.267-1.267 2.881-2.13 4.638-2.479 1.757-.35 3.579-.17 5.234.515 1.656.686 3.07 1.847 4.066 3.337.995 1.489 1.526 3.24 1.526 5.032-.004 2.401-.959 4.703-2.657 6.401-1.698 1.698-4 2.654-6.402 2.658zm0-14.981c-1.17 0-2.315.347-3.288.997-.973.651-1.732 1.575-2.18 2.657-.448 1.081-.565 2.271-.337 3.419.228 1.148.791 2.203 1.619 3.03.828.828 1.883 1.392 3.031 1.62 1.148.228 2.338.111 3.42-.337 1.081-.448 2.006-1.207 2.656-2.18.65-.973.998-2.118.998-3.288-.002-1.569-.626-3.074-1.736-4.183-1.109-1.11-2.614-1.734-4.183-1.736z" fill="#B49A3A"/>
+        <path d="M49.444 41.964c-1.792 0-3.543-.531-5.033-1.526-1.49-.996-2.65-2.411-3.336-4.066-.686-1.655-.865-3.476-.516-5.233.35-1.758 1.212-3.371 2.479-4.638 1.267-1.267 2.881-2.13 4.638-2.479 1.757-.35 3.579-.17 5.234.515 1.655.686 3.07 1.847 4.065 3.336.996 1.49 1.527 3.241 1.527 5.033-.004 2.401-.96 4.703-2.658 6.401-1.698 1.698-4 2.654-6.4 2.657zm0-14.981c-1.171 0-2.316.347-3.29.998-.973.65-1.732 1.574-2.18 2.656-.449 1.082-.566 2.272-.338 3.42.228 1.149.792 2.204 1.62 3.032.828.828 1.883 1.392 3.031 1.62 1.149.229 2.339.112 3.421-.336 1.082-.448 2.007-1.207 2.657-2.18.65-.974.998-2.119.998-3.29-.002-1.569-.626-3.074-1.735-4.184-1.11-1.11-2.615-1.734-4.184-1.736z" fill="#B49A3A"/>
+        <path d="M49.411 32.756v-3.666c-.752.006-1.486.236-2.109.658-.622.423-1.105 1.021-1.389 1.718-.283.697-.354 1.462-.203 2.199.15.737.516 1.413 1.051 1.943.534.53 1.213.89 1.952 1.034.738.145 1.503.067 2.197-.222.695-.29 1.288-.778 1.706-1.404.417-.626.64-1.362.64-2.114 0-.05 0-.098-.007-.14l-3.838-.006zM20.117 32.693v-3.666c-.752.007-1.486.236-2.108.659-.622.423-1.106 1.02-1.389 1.718-.283.697-.353 1.462-.202 2.199.15.737.517 1.413 1.051 1.942.535.53 1.214.889 1.952 1.033.739.145 1.503.067 2.198-.223.694-.29 1.287-.779 1.704-1.405.418-.627.64-1.362.64-2.114 0-.049 0-.096-.009-.14l-3.838-.006zM23.661 51.502h3.21l-1.606 1.671-1.604 1.672-1.605-1.672-1.605-1.671h3.21zM35.075 51.502h3.21l-1.606 1.671-1.604 1.672-1.605-1.672-1.605-1.671h3.21zM46.489 51.502h3.21l-1.605 1.671-1.605 1.672-1.605-1.672-1.605-1.671h3.21zM29.946 57.479h3.21l-1.605 1.67-1.605 1.672-1.604-1.672-1.605-1.67h3.209zM41.361 57.479h3.21l-1.605 1.67-1.604 1.672-1.606-1.672-1.605-1.67h3.21zM35.655 64.209h3.21l-1.606 1.671-1.604 1.672-1.605-1.672-1.605-1.671h3.21z" fill="#B49A3A"/>
+        <path d="M34.35 48.971c-.524-.001-1.03-.194-1.42-.543-.392-.349-.641-.829-.701-1.35-1.533-12.96-5.323-23.67-10.41-29.396C13.035 7.797 1.54 4.196 1.425 4.156c-.52-.184-.948-.561-1.196-1.053-.248-.491-.297-1.06-.137-1.586.161-.527.518-.972.998-1.242.48-.27 1.046-.344 1.58-.207C3.185.224 15.404 4.02 25.019 14.839c5.654 6.365 9.83 17.931 11.458 31.736.065.563-.096 1.128-.447 1.572-.351.444-.864.731-1.426.798-.084.013-.169.022-.254.026z" fill="#B49A3A"/>
+        <path d="M34.555 48.972c-.085 0-.17-.005-.254-.015-.562-.067-1.076-.353-1.427-.798-.352-.444-.513-1.009-.448-1.571 1.616-13.704 5.507-24.363 11.25-30.828C53.285 4.933 65.709 1.056 66.233.897c.269-.082.551-.111.831-.085.28.027.551.109.8.24.248.132.468.312.647.528.179.217.313.467.395.736.083.269.111.551.085.831-.027.28-.108.551-.24.8-.132.248-.311.468-.528.647-.216.179-.466.313-.735.396-.206.064-11.852 3.754-20.606 13.607-5.163 5.807-8.692 15.663-10.205 28.484-.06.52-.31 1-.7 1.349-.391.349-.897.542-1.42.543z" fill="#B49A3A"/>
+      </svg>
+      <div class="brand-text">
+        <div class="title">LA CORTE DICE</div>
+        <div class="sub">Tributaria</div>
+      </div>
+    </div>
+    <nav class="nav" id="mainNav">
+      <a onclick="goHome()" class="active" data-nav="home">Inicio</a>
+      <a onclick="goSearch()" data-nav="search">Buscador</a>
+      <a onclick="alert('Demo: vista Biblioteca');">Biblioteca</a>
+      <a onclick="alert('Demo: vista Noticias');">Noticias</a>
+      <a onclick="alert('Demo: vista Contacto');">Contacto</a>
+    </nav>
+    <div class="user-chip">
+      <div class="avatar">JA</div>
+      John Arias
+    </div>
+  </div>
+</header>
+
+<!-- ==========================================================
+     VIEW: HOME
+     ========================================================== -->
+<section id="view-home" class="view active">
+  <div class="hero">
+    <div class="hero-inner">
+      <span class="hero-eyebrow">Jurisprudencia tributaria del Ecuador</span>
+      <h1>La inteligencia jurídica <span>empieza con la sentencia correcta</span></h1>
+      <p>Busca, compara y descarga sentencias de casación y de instancia del contencioso tributario. Base depurada y actualizada del SRI, SENAE y GADs.</p>
+      <div class="hero-search">
+        <input id="heroInput" type="text" placeholder="Ej: devolución IVA exportador, reclamo administrativo, determinación tributaria…" />
+        <button onclick="runHeroSearch()">Buscar</button>
+      </div>
+      <div class="hero-chips">
+        <span>Populares:</span>
+        <button onclick="runHeroSearchTerm('pago indebido')">pago indebido</button>
+        <button onclick="runHeroSearchTerm('determinación')">determinación</button>
+        <button onclick="runHeroSearchTerm('recurso de revisión')">recurso de revisión</button>
+        <button onclick="runHeroSearchTerm('acción coactiva')">acción coactiva</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-icon">⚖️</div><div><div class="stat-num">5,224</div><div class="stat-lbl">Causas tributarias</div></div></div>
+    <div class="stat"><div class="stat-icon">📋</div><div><div class="stat-num">632</div><div class="stat-lbl">Casaciones CNJ</div></div></div>
+    <div class="stat"><div class="stat-icon">🏛️</div><div><div class="stat-num">4,592</div><div class="stat-lbl">Instancias Tribunal</div></div></div>
+    <div class="stat"><div class="stat-icon">🔄</div><div><div class="stat-num">Diario</div><div class="stat-lbl">Actualización</div></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <div>
+        <h2>Explora por entidad tributaria</h2>
+        <p>Accede directamente a las materias más consultadas por cada autoridad.</p>
+      </div>
+    </div>
+    <div class="entities">
+
+      <div class="entity-card">
+        <div class="entity-head">
+          <h3>SRI</h3>
+          <span class="count">2,847 causas</span>
+        </div>
+        <div class="entity-links">
+          <a onclick="openSearch({entidad:'SRI', categoria:'Pago indebido'})">Pago indebido<span class="arrow">→</span></a>
+          <a onclick="openSearch({entidad:'SRI', categoria:'Recurso de revisión'})">Recurso de revisión<span class="arrow">→</span></a>
+          <a onclick="openSearch({entidad:'SRI', categoria:'Determinación'})">Determinación<span class="arrow">→</span></a>
+          <a onclick="openSearch({entidad:'SRI', categoria:'Reclamos administrativos'})">Reclamos administrativos<span class="arrow">→</span></a>
+          <a onclick="openSearch({entidad:'SRI', categoria:'Impuesto a la renta'})">Impuesto a la renta<span class="arrow">→</span></a>
+          <a class="ver-todos" onclick="openSearch({entidad:'SRI'})">Ver todas las causas del SRI →</a>
+        </div>
+      </div>
+
+      <div class="entity-card">
+        <div class="entity-head">
+          <h3>SENAE</h3>
+          <span class="count">1,528 causas</span>
+        </div>
+        <div class="entity-links">
+          <a onclick="openSearch({entidad:'SENAE', categoria:'Determinación'})">Determinación<span class="arrow">→</span></a>
+          <a onclick="openSearch({entidad:'SENAE', categoria:'Reclamo de pago indebido'})">Reclamo de pago indebido<span class="arrow">→</span></a>
+          <a onclick="openSearch({entidad:'SENAE', categoria:'Procedimientos sancionatorios'})">Procedimientos sancionatorios<span class="arrow">→</span></a>
+          <a onclick="openSearch({entidad:'SENAE', categoria:'Controles aduaneros'})">Controles aduaneros<span class="arrow">→</span></a>
+          <a onclick="openSearch({entidad:'SENAE', categoria:'Extinción de obligaciones'})">Extinción de obligaciones<span class="arrow">→</span></a>
+          <a class="ver-todos" onclick="openSearch({entidad:'SENAE'})">Ver todas las causas del SENAE →</a>
+        </div>
+      </div>
+
+      <div class="entity-card">
+        <div class="entity-head">
+          <h3>GADs</h3>
+          <span class="count">849 causas</span>
+        </div>
+        <div class="entity-links">
+          <a onclick="openSearch({entidad:'GADS', categoria:'Acción coactiva'})">Acción coactiva<span class="arrow">→</span></a>
+          <a onclick="openSearch({entidad:'GADS', categoria:'Extinción de obligaciones'})">Extinción de obligaciones<span class="arrow">→</span></a>
+          <a onclick="openSearch({entidad:'GADS', categoria:'Impuesto de patentes'})">Impuesto de patentes<span class="arrow">→</span></a>
+          <a onclick="openSearch({entidad:'GADS', categoria:'Determinación'})">Determinación<span class="arrow">→</span></a>
+          <a onclick="openSearch({entidad:'GADS', categoria:'Impuesto uno por mil'})">Impuesto uno por mil<span class="arrow">→</span></a>
+          <a class="ver-todos" onclick="openSearch({entidad:'GADS'})">Ver todas las causas de GADs →</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <div>
+        <h2>Sentencias recientes</h2>
+        <p>Últimas resoluciones incorporadas a la base.</p>
+      </div>
+      <button class="btn" onclick="goSearch()">Ver todas →</button>
+    </div>
+    <div id="recentList"></div>
+  </div>
+
+</section>
+
+<!-- ==========================================================
+     VIEW: BUSCADOR
+     ========================================================== -->
+<section id="view-search" class="view">
+  <div class="search-shell">
+
+    <!-- SIDEBAR -->
+    <aside class="sidebar">
+      <div class="sidebar-head">
+        <h5>Filtros</h5>
+        <button class="clear" onclick="clearFilters()">Limpiar</button>
+      </div>
+      <div class="tabs">
+        <button class="tab active" data-tab="general" onclick="showTab('general')">General</button>
+        <button class="tab" data-tab="categorias" onclick="showTab('categorias')">Categorías</button>
+      </div>
+
+      <div class="sidebar-body">
+        <!-- PANEL GENERAL -->
+        <div class="panel active" id="panel-general">
+          <div class="field search-box">
+            <label>Búsqueda por palabra clave</label>
+            <input type="text" id="f-keyword" placeholder="Buscar en resultados..." oninput="applyFilters()" />
+          </div>
+
+          <div class="field">
+            <label for="f-instancia">Instancia</label>
+            <select id="f-instancia" onchange="onInstanciaChange()">
+              <option value="all">Seleccionar Instancia</option>
+              <option value="casacion">Casación (CNJ)</option>
+              <option value="instancia">Instancia (Tribunal Distrital)</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="f-entidad">Entidad</label>
+            <select id="f-entidad" onchange="applyFilters()">
+              <option value="all">Seleccionar Entidad</option>
+              <option value="SRI">SRI</option>
+              <option value="SENAE">SENAE</option>
+              <option value="GADS">GADs</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Rango de fecha</label>
+            <div class="field-row">
+              <input type="date" id="f-fecha-desde" onchange="applyFilters()" />
+              <span class="dash">–</span>
+              <input type="date" id="f-fecha-hasta" onchange="applyFilters()" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="f-tribunal">Tribunal</label>
+            <select id="f-tribunal" onchange="onTribunalChange()" disabled>
+              <option value="all">Seleccionar Tribunal</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="f-juez">Juez</label>
+            <select id="f-juez" onchange="applyFilters()" disabled>
+              <option value="all">Seleccionar Juez</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label>Cuantía $</label>
+            <div class="field-row">
+              <input type="number" id="f-cuantia-desde" placeholder="Desde" oninput="applyFilters()" />
+              <span class="dash">–</span>
+              <input type="number" id="f-cuantia-hasta" placeholder="Hasta" oninput="applyFilters()" />
+            </div>
+          </div>
+
+          <div class="field">
+            <label for="f-accion">Tipo de acción</label>
+            <select id="f-accion" onchange="applyFilters()">
+              <option value="all">Seleccionar tipo de acción</option>
+              <option>Impugnación</option>
+              <option>Pago indebido</option>
+              <option>Pago en exceso</option>
+              <option>Excepciones a la coactiva</option>
+              <option>Acción directa</option>
+              <option>Medidas cautelares</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="f-decision">Decisión</label>
+            <select id="f-decision" onchange="applyFilters()" disabled>
+              <option value="all">Decisión</option>
+              <option>Acepta el recurso</option>
+              <option>Niega el recurso</option>
+              <option>Acepta parcialmente</option>
+              <option>Inadmite</option>
+              <option>Casa la sentencia</option>
+              <option>No casa la sentencia</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="f-voto">Voto salvado</label>
+            <select id="f-voto" onchange="applyFilters()" disabled>
+              <option value="all">Voto salvado</option>
+              <option>Con voto salvado</option>
+              <option>Sin voto salvado</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="f-estado">Estado</label>
+            <select id="f-estado" onchange="applyFilters()">
+              <option value="all">Estado</option>
+              <option>Ejecutoriado</option>
+              <option>En apelación</option>
+              <option>Con casación pendiente</option>
+              <option>Archivado</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="f-causal">Causal invocada</label>
+            <select id="f-causal" onchange="applyFilters()" disabled>
+              <option value="all">Causal invocada</option>
+              <option>Causal 1 - Aplicación indebida</option>
+              <option>Causal 2 - Falta de aplicación</option>
+              <option>Causal 3 - Errónea interpretación</option>
+              <option>Causal 4 - Apreciación de la prueba</option>
+              <option>Causal 5 - Falta de motivación</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- PANEL CATEGORÍAS -->
+        <div class="panel" id="panel-categorias">
+          <div class="field">
+            <label>Entidad</label>
+            <select id="f-entidad-cat" onchange="renderCategorias()">
+              <option value="all">Seleccionar Entidad</option>
+              <option value="SRI">SRI</option>
+              <option value="SENAE">SENAE</option>
+              <option value="GADS">GADs</option>
+            </select>
+          </div>
+
+          <div class="field search-box">
+            <label>Buscar categoría</label>
+            <input type="text" id="f-cat-search" placeholder="Buscar categoría..." oninput="renderCategorias()" />
+          </div>
+
+          <div id="catContainer">
+            <div class="cat-header" style="color:var(--muted); font-weight:400;">
+              Selecciona una entidad para ver sus categorías
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- RESULTS -->
+    <div class="results">
+      <div class="crumb">
+        <a onclick="goHome()">Inicio</a> <span>/</span> <strong>Buscador</strong>
+      </div>
+
+      <div class="results-head" style="margin-top:8px;">
+        <h2 class="results-count"><span id="resCount">0</span> resultados <span>encontrados</span></h2>
+        <div class="results-sort">
+          <label for="f-orden">Ordenar por:</label>
+          <select id="f-orden" onchange="applyFilters()">
+            <option value="fecha-desc">Fecha (más reciente)</option>
+            <option value="fecha-asc">Fecha (más antigua)</option>
+            <option value="cuantia-desc">Cuantía (mayor)</option>
+            <option value="cuantia-asc">Cuantía (menor)</option>
+          </select>
+        </div>
+      </div>
+
+      <div id="activeFilters" class="active-filters"></div>
+
+      <div id="resultsList"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================================
+     VIEW: DETALLE
+     ========================================================== -->
+<section id="view-detail" class="view">
+  <div class="detail-shell" id="detailShell">
+    <!-- JS popula -->
+  </div>
+</section>
+
+<footer class="footer">
+  <strong>La Corte Dice Tributaria</strong> — Prototipo de rediseño 2026<br/>
+  Base jurisprudencial del Ecuador · Preparado por el equipo de La Corte Dice
+</footer>
+
+<!-- ==========================================================
+     DATOS DE EJEMPLO (basados en modelos reales Casacion/Instancia)
+     ========================================================== -->
+<script>
+/* ---------- CATEGORÍAS (exactamente como entities.json) ---------- */
+const CATEGORIES = {
+  SRI: [
+    { name:"Pago indebido", hijos:["IVA exportadores", "Retenciones en la fuente", "ICE", "Salidas de divisas"] },
+    { name:"Recurso de revisión", hijos:["Oficio", "A petición de parte"] },
+    { name:"Determinación", hijos:["Directa", "Presuntiva", "Mixta"] },
+    { name:"Reclamos administrativos", hijos:["Pago indebido", "Pago en exceso", "Reposición"] },
+    { name:"Impuesto a la renta", hijos:["Personas naturales", "Sociedades", "No residentes"] }
+  ],
+  SENAE: [
+    { name:"Determinación", hijos:["Valoración aduanera", "Clasificación arancelaria", "Origen"] },
+    { name:"Reclamo de pago indebido", hijos:["Aranceles", "IVA importaciones"] },
+    { name:"Procedimientos sancionatorios", hijos:["Contrabando", "Defraudación aduanera"] },
+    { name:"Controles aduaneros", hijos:["Aforo físico", "Aforo documental"] },
+    { name:"Extinción de obligaciones", hijos:["Prescripción", "Compensación"] }
+  ],
+  GADS: [
+    { name:"Acción coactiva", hijos:["Excepciones", "Tercerías", "Remate"] },
+    { name:"Extinción de obligaciones", hijos:["Prescripción", "Remisión"] },
+    { name:"Impuesto de patentes", hijos:["Determinación", "Exoneración"] },
+    { name:"Determinación", hijos:["1.5 por mil", "Predios urbanos", "Predios rurales"] },
+    { name:"Impuesto uno por mil", hijos:["Cálculo", "Base imponible"] }
+  ]
+};
+
+/* ---------- TRIBUNALES por INSTANCIA (mapeo real) ---------- */
+const TRIBUNALES_POR_INSTANCIA = {
+  casacion: [
+    "Sala Especializada de lo Contencioso Tributario de la CNJ"
+  ],
+  instancia: [
+    "Tribunal Distrital de lo Contencioso Tributario con sede en Quito",
+    "Tribunal Distrital de lo Contencioso Tributario con sede en Guayaquil",
+    "Tribunal Distrital de lo Contencioso Tributario con sede en Cuenca",
+    "Tribunal Distrital de lo Contencioso Tributario con sede en Portoviejo"
+  ]
+};
+
+/* ---------- JUECES por TRIBUNAL ---------- */
+const JUECES_POR_TRIBUNAL = {
+  "Sala Especializada de lo Contencioso Tributario de la CNJ": [
+    "Dra. María del Carmen Espinosa Valdivieso",
+    "Dr. Álvaro Ojeda Hidalgo",
+    "Dr. José Luis Terán Suárez",
+    "Dr. Javier de los Reyes Suárez",
+    "Dra. Ana María Crespo Santos"
+  ],
+  "Tribunal Distrital de lo Contencioso Tributario con sede en Quito": [
+    "Dr. Carlos Xavier Pazmiño Mena",
+    "Dra. Silvana Mariela Bustos López",
+    "Dr. Luis Fernando Cevallos Andrade"
+  ],
+  "Tribunal Distrital de lo Contencioso Tributario con sede en Guayaquil": [
+    "Dra. Verónica Elizabeth Hernández Pérez",
+    "Dr. Jorge Andrés Blum Carcelén",
+    "Dra. Mónica Alexandra Cárdenas Pineda"
+  ],
+  "Tribunal Distrital de lo Contencioso Tributario con sede en Cuenca": [
+    "Dr. Fernando Patricio Malo Larrea",
+    "Dra. Patricia Eugenia Vázquez Calderón"
+  ],
+  "Tribunal Distrital de lo Contencioso Tributario con sede en Portoviejo": [
+    "Dr. Luis Alberto Zambrano Mendoza",
+    "Dra. Carmen Lucía Loor Cedeño"
+  ]
+};
+
+/* ---------- DATASET: 22 sentencias de ejemplo con números completos ---------- */
+const DATA = [
+  {
+    id:1, tipo:"casacion", entidad:"SRI",
+    juicio:"17751-2023-00267",
+    fecha:"2026-03-28", cuantia:1485320.50,
+    tribunal:"Sala Especializada de lo Contencioso Tributario de la CNJ",
+    juez:"Dra. María del Carmen Espinosa Valdivieso",
+    jueces:["Dra. María del Carmen Espinosa Valdivieso", "Dr. Álvaro Ojeda Hidalgo", "Dr. José Luis Terán Suárez"],
+    recurrentes:["EXPORTADORA BANANERA NOBOA S.A."],
+    causales:["Causal 3 - Errónea interpretación"],
+    accion:"Pago indebido", categoria:"Pago indebido", subcat:"IVA exportadores",
+    decision:"Casa la sentencia", decisionTipo:"acepta",
+    voto:"Sin voto salvado", estado:"Ejecutoriado",
+    antecedentes:"La contribuyente presentó reclamo administrativo por devolución de IVA pagado en la adquisición de insumos agrícolas destinados a la exportación de banano. La administración tributaria negó parcialmente el derecho alegando falta de documentación de respaldo para el periodo fiscal 2022.",
+    argRecurrente:"La recurrente sostiene que la Administración Tributaria desconoció el principio de neutralidad del IVA aplicable a exportaciones (art. 66 LRTI) y que la documentación aportada cumple con los requisitos del Reglamento. Invoca además la existencia de jurisprudencia vinculante de esta Sala sobre la materia.",
+    argContraparte:"El SRI argumenta que los comprobantes de venta presentan inconsistencias en la descripción del bien y que existe falta de correlación con la documentación de soporte exigida por la normativa aduanera para acreditar la exportación efectiva.",
+    criterio:"La Sala considera que el principio de neutralidad del IVA en las exportaciones constituye un pilar del sistema tributario ecuatoriano y que las exigencias formales de la administración no pueden convertirse en obstáculos que desvirtúen el derecho sustancial del contribuyente. La documentación aportada en conjunto (DAE, facturas, contratos, pólizas) acredita suficientemente las operaciones.",
+    jurisprudencia:["Resolución No. 07-2016 CNJ-Sala Tributaria", "Sentencia 17751-2019-00154"],
+    medidas:"Se dispone al SRI reliquidar la devolución solicitada incluyendo los intereses legales desde la presentación del reclamo administrativo.",
+    observaciones:"Sentencia que consolida criterio aplicable a exportadores bananeros."
+  },
+  {
+    id:2, tipo:"instancia", entidad:"SENAE",
+    juicio:"09501-2024-00521",
+    fecha:"2026-03-14", cuantia:287450.00,
+    tribunal:"Tribunal Distrital de lo Contencioso Tributario con sede en Guayaquil",
+    juez:"Dra. Verónica Elizabeth Hernández Pérez",
+    jueces:["Dra. Verónica Elizabeth Hernández Pérez", "Dr. Jorge Andrés Blum Carcelén", "Dra. Mónica Alexandra Cárdenas Pineda"],
+    recurrentes:["IMPORTADORA INDUSTRIAL DEL PACÍFICO S.A."],
+    causales:[],
+    accion:"Impugnación", categoria:"Determinación", subcat:"Clasificación arancelaria",
+    decision:"Acepta el recurso", decisionTipo:"acepta",
+    voto:"Sin voto salvado", estado:"En apelación",
+    antecedentes:"La empresa impugna la reclasificación arancelaria efectuada por el SENAE sobre repuestos industriales importados desde China, que la administración ubicó en una subpartida con arancel superior al declarado por el contribuyente.",
+    argRecurrente:"Se invoca la aplicación de la Nota Explicativa 6 de la Sección XVI del Arancel Nacional de Importaciones y el principio de especificidad de la subpartida declarada. Se aportan dictámenes técnicos del fabricante y jurisprudencia de la OMA.",
+    argContraparte:"El SENAE sostiene que la función principal del producto determina su clasificación y que el contribuyente omitió declarar características esenciales del bien que inciden en la partida aplicable.",
+    criterio:"El Tribunal encuentra que la autoridad aduanera no motivó suficientemente el cambio de clasificación y no desvirtuó los dictámenes técnicos del fabricante. La presunción de legitimidad del acto administrativo cede ante la prueba documental pertinente.",
+    jurisprudencia:["Resolución SENAE-DGN-2021-0032-RE"],
+    medidas:"Se ordena al SENAE dejar sin efecto la liquidación complementaria y reintegrar los valores cobrados con intereses.",
+    observaciones:""
+  },
+  {
+    id:3, tipo:"casacion", entidad:"SRI",
+    juicio:"17751-2022-00089",
+    fecha:"2026-02-22", cuantia:3250000.00,
+    tribunal:"Sala Especializada de lo Contencioso Tributario de la CNJ",
+    juez:"Dr. Álvaro Ojeda Hidalgo",
+    jueces:["Dr. Álvaro Ojeda Hidalgo","Dra. María del Carmen Espinosa Valdivieso","Dra. Ana María Crespo Santos"],
+    recurrentes:["CORPORACIÓN FAVORITA C.A."],
+    causales:["Causal 1 - Aplicación indebida","Causal 4 - Apreciación de la prueba"],
+    accion:"Impugnación", categoria:"Determinación", subcat:"Directa",
+    decision:"No casa la sentencia", decisionTipo:"niega",
+    voto:"Con voto salvado", estado:"Ejecutoriado",
+    antecedentes:"La administración tributaria realizó una determinación directa del Impuesto a la Renta del ejercicio fiscal 2018 sobre el grupo económico, estableciendo diferencias por gastos no deducibles relacionados con transacciones con partes relacionadas del exterior.",
+    argRecurrente:"Se argumenta indebida aplicación del art. 10 LRTI respecto de la deducibilidad de gastos y errónea apreciación de la prueba pericial presentada sobre los precios de transferencia.",
+    argContraparte:"El SRI defiende la determinación sosteniendo que los precios aplicados con partes relacionadas no cumplen el principio de plena competencia y que la documentación de soporte resulta insuficiente.",
+    criterio:"La Sala confirma el criterio del tribunal inferior: no corresponde en casación reexaminar la valoración probatoria efectuada en instancia, salvo error manifiesto, el cual no se acredita en el presente caso.",
+    jurisprudencia:["Sentencia 17751-2020-00345","Resolución NAC-DGERCGC18-00000433"],
+    medidas:"",
+    observaciones:"El voto salvado de la Dra. Crespo considera que sí existió error manifiesto en la valoración del peritaje de precios de transferencia.",
+    votoSalvadoJuez:"Dra. Ana María Crespo Santos",
+    votoSalvadoArg:"Considera que la sentencia impugnada no valoró adecuadamente el dictamen pericial y que la prueba debió ser apreciada conforme a las reglas de la sana crítica del art. 164 del COGEP."
+  },
+  {
+    id:4, tipo:"instancia", entidad:"GADS",
+    juicio:"17503-2024-00127",
+    fecha:"2026-02-05", cuantia:45680.00,
+    tribunal:"Tribunal Distrital de lo Contencioso Tributario con sede en Quito",
+    juez:"Dr. Carlos Xavier Pazmiño Mena",
+    jueces:["Dr. Carlos Xavier Pazmiño Mena","Dra. Silvana Mariela Bustos López","Dr. Luis Fernando Cevallos Andrade"],
+    recurrentes:["CONSTRUCTORA QUITEÑA CIA. LTDA."],
+    causales:[],
+    accion:"Excepciones a la coactiva", categoria:"Acción coactiva", subcat:"Excepciones",
+    decision:"Acepta parcialmente", decisionTipo:"parcial",
+    voto:"Sin voto salvado", estado:"Con casación pendiente",
+    antecedentes:"El Municipio del Distrito Metropolitano de Quito inició procedimiento de ejecución coactiva por obligaciones relacionadas con el impuesto de patentes municipales del periodo 2019-2021. La contribuyente presentó excepciones alegando prescripción parcial y pago previo.",
+    argRecurrente:"Se invoca la prescripción del periodo 2019 por el transcurso del plazo establecido en el art. 55 del Código Tributario y el pago parcial de los periodos subsiguientes mediante convenio de facilidades.",
+    argContraparte:"El GAD sostiene que los actos de determinación interrumpieron la prescripción y que los pagos invocados corresponden a otros conceptos tributarios.",
+    criterio:"El Tribunal acoge la excepción de prescripción respecto del periodo 2019 por cuanto el acto determinativo fue emitido fuera del plazo legal, pero rechaza la excepción de pago por falta de identificación específica de los valores.",
+    jurisprudencia:[],
+    medidas:"Se ordena al GAD excluir de la coactiva los valores correspondientes al periodo 2019 y continuar el trámite por los periodos subsiguientes.",
+    observaciones:""
+  },
+  {
+    id:5, tipo:"casacion", entidad:"SENAE",
+    juicio:"17751-2023-00412",
+    fecha:"2026-01-18", cuantia:892140.75,
+    tribunal:"Sala Especializada de lo Contencioso Tributario de la CNJ",
+    juez:"Dr. José Luis Terán Suárez",
+    jueces:["Dr. José Luis Terán Suárez","Dr. Javier de los Reyes Suárez","Dra. María del Carmen Espinosa Valdivieso"],
+    recurrentes:["IMPORTACIONES ANDINAS S.A."],
+    causales:["Causal 5 - Falta de motivación"],
+    accion:"Impugnación", categoria:"Determinación", subcat:"Valoración aduanera",
+    decision:"Casa la sentencia", decisionTipo:"acepta",
+    voto:"Sin voto salvado", estado:"Ejecutoriado",
+    antecedentes:"El SENAE efectuó ajuste de valoración sobre importaciones de vehículos desestimando el valor de transacción declarado y aplicando el método del valor deductivo.",
+    argRecurrente:"Falta de motivación respecto a las razones técnicas para descartar el valor de transacción y omisión del procedimiento de consulta previa con el importador.",
+    argContraparte:"El SENAE defiende la existencia de dudas razonables sobre el valor declarado basadas en precios de referencia del mercado internacional.",
+    criterio:"La Sala establece que el descarte del valor de transacción requiere motivación específica sobre las dudas razonables y la realización del procedimiento consultivo establecido en el Acuerdo de Valoración de la OMC.",
+    jurisprudencia:["Acuerdo Relativo a la Aplicación del Art. VII del GATT","Decisión 571 CAN"],
+    medidas:"Se declara la nulidad del ajuste y se ordena al SENAE emitir nuevo pronunciamiento debidamente motivado.",
+    observaciones:""
+  },
+  {
+    id:6, tipo:"instancia", entidad:"SRI",
+    juicio:"17510-2023-00892",
+    fecha:"2025-12-11", cuantia:124500.00,
+    tribunal:"Tribunal Distrital de lo Contencioso Tributario con sede en Quito",
+    juez:"Dra. Silvana Mariela Bustos López",
+    jueces:["Dra. Silvana Mariela Bustos López","Dr. Carlos Xavier Pazmiño Mena","Dr. Luis Fernando Cevallos Andrade"],
+    recurrentes:["SOCIEDAD AGRÍCOLA SAN MATEO S.A."],
+    causales:[],
+    accion:"Pago indebido", categoria:"Reclamos administrativos", subcat:"Pago indebido",
+    decision:"Acepta el recurso", decisionTipo:"acepta",
+    voto:"Sin voto salvado", estado:"Ejecutoriado",
+    antecedentes:"La contribuyente solicitó devolución de pago indebido del Impuesto a la Salida de Divisas efectuado en remesas destinadas a la compra de insumos agrícolas amparados en acuerdos de crédito externo.",
+    argRecurrente:"Aplicación de la exoneración prevista para pagos de capital e intereses por créditos externos registrados en el BCE (art. 159 LRET).",
+    argContraparte:"El SRI sostiene que los documentos no acreditan suficientemente la relación entre las remesas y los créditos registrados.",
+    criterio:"El Tribunal encuentra acreditada la correspondencia entre las transferencias y los créditos registrados, cumpliéndose los requisitos para la exoneración del ISD.",
+    jurisprudencia:["Resolución NAC-DGERCGC13-00000584"],
+    medidas:"Se ordena la devolución del ISD pagado indebidamente con los intereses legales correspondientes.",
+    observaciones:""
+  },
+  {
+    id:7, tipo:"instancia", entidad:"SRI",
+    juicio:"17510-2024-00056",
+    fecha:"2025-11-28", cuantia:67890.00,
+    tribunal:"Tribunal Distrital de lo Contencioso Tributario con sede en Quito",
+    juez:"Dr. Luis Fernando Cevallos Andrade",
+    jueces:["Dr. Luis Fernando Cevallos Andrade","Dr. Carlos Xavier Pazmiño Mena","Dra. Silvana Mariela Bustos López"],
+    recurrentes:["INVERSIONES EL DORADO CIA. LTDA."],
+    causales:[],
+    accion:"Impugnación", categoria:"Recurso de revisión", subcat:"Oficio",
+    decision:"Niega el recurso", decisionTipo:"niega",
+    voto:"Sin voto salvado", estado:"Archivado",
+    antecedentes:"Impugnación de resolución que resolvió recurso de revisión de oficio sobre determinación del Impuesto a la Renta del ejercicio 2017, manteniendo la glosa por gastos no deducibles.",
+    argRecurrente:"Violación al debido proceso por la tardía notificación del auto de apertura del recurso de revisión de oficio.",
+    argContraparte:"El SRI argumenta que la notificación se efectuó en debida forma y que el recurrente participó activamente en el procedimiento.",
+    criterio:"El Tribunal verifica que las notificaciones se efectuaron conforme al Código Tributario y que el contribuyente ejerció su derecho a la defensa en todas las etapas del procedimiento.",
+    jurisprudencia:[],
+    medidas:"",
+    observaciones:""
+  },
+  {
+    id:8, tipo:"casacion", entidad:"GADS",
+    juicio:"17751-2022-00578",
+    fecha:"2025-10-15", cuantia:215000.00,
+    tribunal:"Sala Especializada de lo Contencioso Tributario de la CNJ",
+    juez:"Dr. Javier de los Reyes Suárez",
+    jueces:["Dr. Javier de los Reyes Suárez","Dra. María del Carmen Espinosa Valdivieso","Dr. Álvaro Ojeda Hidalgo"],
+    recurrentes:["Municipio de Guayaquil","EMPRESA ELÉCTRICA PÚBLICA ESTRATÉGICA DEL LITORAL"],
+    causales:["Causal 2 - Falta de aplicación"],
+    accion:"Impugnación", categoria:"Impuesto uno por mil", subcat:"Base imponible",
+    decision:"Casa la sentencia", decisionTipo:"acepta",
+    voto:"Sin voto salvado", estado:"Ejecutoriado",
+    antecedentes:"Controversia sobre la base imponible del impuesto del 1,5 por mil sobre los activos totales aplicable a empresa eléctrica pública con operaciones en múltiples jurisdicciones municipales.",
+    argRecurrente:"El Municipio invoca la falta de aplicación del art. 553 COOTAD respecto de la territorialidad del impuesto y la obligación de distribución por cantón.",
+    argContraparte:"La empresa eléctrica alega que su régimen jurídico especial determina una base imponible diferente y que el cálculo municipal es excesivo.",
+    criterio:"La Sala establece que el impuesto del 1,5 por mil debe liquidarse conforme a la proporción de activos efectivamente ubicados en cada jurisdicción cantonal, independientemente del domicilio fiscal principal de la entidad.",
+    jurisprudencia:["Sentencia 17751-2019-00223"],
+    medidas:"Se ordena nueva liquidación con distribución proporcional por cantón conforme a los parámetros establecidos en la sentencia.",
+    observaciones:"Sentencia de referencia para empresas públicas multi-cantonales."
+  },
+  {
+    id:9, tipo:"instancia", entidad:"SENAE",
+    juicio:"09501-2023-01245",
+    fecha:"2025-09-30", cuantia:512340.00,
+    tribunal:"Tribunal Distrital de lo Contencioso Tributario con sede en Guayaquil",
+    juez:"Dr. Jorge Andrés Blum Carcelén",
+    jueces:["Dr. Jorge Andrés Blum Carcelén","Dra. Verónica Elizabeth Hernández Pérez","Dra. Mónica Alexandra Cárdenas Pineda"],
+    recurrentes:["NAVIERA INTEROCEÁNICA S.A."],
+    causales:[],
+    accion:"Pago indebido", categoria:"Reclamo de pago indebido", subcat:"IVA importaciones",
+    decision:"Acepta parcialmente", decisionTipo:"parcial",
+    voto:"Sin voto salvado", estado:"Ejecutoriado",
+    antecedentes:"Solicitud de devolución de IVA pagado en importación de combustible destinado a naves de tráfico internacional, invocando exoneración por tratarse de aprovisionamiento marítimo.",
+    argRecurrente:"Aplicación de la exoneración de IVA prevista para aprovisionamiento de naves de tráfico internacional y devolución de valores pagados indebidamente.",
+    argContraparte:"El SENAE niega parcialmente al considerar que parte del combustible fue destinado a operaciones de cabotaje no exoneradas.",
+    criterio:"Se acepta parcialmente el reclamo por la porción destinada efectivamente a tráfico internacional acreditada documentalmente, rechazándose la parte correspondiente a cabotaje.",
+    jurisprudencia:[],
+    medidas:"Devolución parcial con intereses legales.",
+    observaciones:""
+  },
+  {
+    id:10, tipo:"instancia", entidad:"SRI",
+    juicio:"01801-2024-00234",
+    fecha:"2025-09-12", cuantia:98450.00,
+    tribunal:"Tribunal Distrital de lo Contencioso Tributario con sede en Cuenca",
+    juez:"Dr. Fernando Patricio Malo Larrea",
+    jueces:["Dr. Fernando Patricio Malo Larrea","Dra. Patricia Eugenia Vázquez Calderón"],
+    recurrentes:["CERÁMICA INDUSTRIAL DEL AUSTRO S.A."],
+    causales:[],
+    accion:"Impugnación", categoria:"Impuesto a la renta", subcat:"Sociedades",
+    decision:"Acepta el recurso", decisionTipo:"acepta",
+    voto:"Sin voto salvado", estado:"En apelación",
+    antecedentes:"Impugnación de acto determinativo del Impuesto a la Renta del ejercicio 2020 que glosaba gastos de investigación y desarrollo por supuesta falta de documentación técnica.",
+    argRecurrente:"Los gastos de I+D están debidamente documentados mediante contratos, informes técnicos y facturas, cumpliendo los requisitos para la deducibilidad adicional del 100% establecida por la ley.",
+    argContraparte:"El SRI sostiene que los informes técnicos no son específicos y que las actividades descritas corresponden a mantenimiento operativo y no a I+D.",
+    criterio:"El Tribunal analiza la documentación técnica y concluye que las actividades reúnen los elementos de novedad, creatividad e incertidumbre propios de la I+D conforme al Manual de Frascati referenciado por la normativa.",
+    jurisprudencia:["Reglamento a la Ley Orgánica de Emprendimiento e Innovación"],
+    medidas:"Se deja sin efecto la glosa y se ordena el reconocimiento de la deducción adicional por I+D.",
+    observaciones:""
+  },
+  {
+    id:11, tipo:"casacion", entidad:"SRI",
+    juicio:"17751-2024-00045",
+    fecha:"2025-08-20", cuantia:4780000.00,
+    tribunal:"Sala Especializada de lo Contencioso Tributario de la CNJ",
+    juez:"Dra. Ana María Crespo Santos",
+    jueces:["Dra. Ana María Crespo Santos","Dr. Álvaro Ojeda Hidalgo","Dr. José Luis Terán Suárez"],
+    recurrentes:["BANCO DEL AUSTRO S.A."],
+    causales:["Causal 3 - Errónea interpretación"],
+    accion:"Impugnación", categoria:"Impuesto a la renta", subcat:"Sociedades",
+    decision:"No casa la sentencia", decisionTipo:"niega",
+    voto:"Sin voto salvado", estado:"Ejecutoriado",
+    antecedentes:"Controversia sobre la deducibilidad de provisiones por cartera incobrable en entidad del sistema financiero y su tratamiento diferenciado respecto del régimen general.",
+    argRecurrente:"Errónea interpretación del art. 10 LRTI y de las normas especiales aplicables a entidades financieras supervisadas por la Superintendencia de Bancos.",
+    argContraparte:"El SRI sostiene que la interpretación es correcta y que las provisiones exceden los límites de deducibilidad aplicables.",
+    criterio:"La Sala confirma el criterio del tribunal inferior sobre la aplicación de los límites de deducibilidad y el carácter especial del régimen financiero sin que ello implique exención total.",
+    jurisprudencia:["Resolución NAC-DGERCGC12-00001"],
+    medidas:"",
+    observaciones:""
+  },
+  {
+    id:12, tipo:"instancia", entidad:"GADS",
+    juicio:"09501-2024-00879",
+    fecha:"2025-07-25", cuantia:23450.00,
+    tribunal:"Tribunal Distrital de lo Contencioso Tributario con sede en Guayaquil",
+    juez:"Dra. Mónica Alexandra Cárdenas Pineda",
+    jueces:["Dra. Mónica Alexandra Cárdenas Pineda","Dr. Jorge Andrés Blum Carcelén","Dra. Verónica Elizabeth Hernández Pérez"],
+    recurrentes:["HOTELERA TROPICAL S.A."],
+    causales:[],
+    accion:"Impugnación", categoria:"Impuesto de patentes", subcat:"Exoneración",
+    decision:"Niega el recurso", decisionTipo:"niega",
+    voto:"Sin voto salvado", estado:"Ejecutoriado",
+    antecedentes:"Impugnación contra resolución municipal que denegó la solicitud de exoneración del impuesto de patentes invocando la calidad de nueva inversión turística amparada en incentivos.",
+    argRecurrente:"La contribuyente sostiene reunir los requisitos de la ordenanza municipal de fomento turístico para acceder a la exoneración por cinco años.",
+    argContraparte:"El Municipio alega que la empresa no cumple el requisito de empleo mínimo local ni la inversión comprometida en el plan aprobado.",
+    criterio:"El Tribunal verifica el incumplimiento de los parámetros objetivos establecidos en la ordenanza, particularmente el empleo local directo requerido para mantener el beneficio.",
+    jurisprudencia:[],
+    medidas:"",
+    observaciones:""
+  },
+  {
+    id:13, tipo:"casacion", entidad:"SENAE",
+    juicio:"17751-2023-00321",
+    fecha:"2025-07-02", cuantia:1678500.25,
+    tribunal:"Sala Especializada de lo Contencioso Tributario de la CNJ",
+    juez:"Dra. María del Carmen Espinosa Valdivieso",
+    jueces:["Dra. María del Carmen Espinosa Valdivieso","Dr. José Luis Terán Suárez","Dr. Javier de los Reyes Suárez"],
+    recurrentes:["TEXTILES PACIFICO EXPORT S.A."],
+    causales:["Causal 1 - Aplicación indebida"],
+    accion:"Pago indebido", categoria:"Reclamo de pago indebido", subcat:"Aranceles",
+    decision:"Casa la sentencia", decisionTipo:"acepta",
+    voto:"Sin voto salvado", estado:"Ejecutoriado",
+    antecedentes:"Reclamo de pago indebido de aranceles correspondientes a importaciones textiles amparadas en certificados de origen CAN que fueron desestimados por el SENAE por supuestas irregularidades formales.",
+    argRecurrente:"Aplicación indebida del art. 15 del Reglamento Andino de Origen al exigir formalidades no previstas en la normativa comunitaria.",
+    argContraparte:"El SENAE sostiene que los certificados no cumplieron con los requisitos formales y que las dudas sobre el origen se mantuvieron vigentes.",
+    criterio:"La Sala establece que las dudas sobre el origen deben ventilarse en el marco del procedimiento específico de verificación y no mediante el desconocimiento unilateral del certificado.",
+    jurisprudencia:["Decisión 416 CAN","Decisión 417 CAN"],
+    medidas:"Devolución de los aranceles pagados indebidamente.",
+    observaciones:""
+  },
+  {
+    id:14, tipo:"instancia", entidad:"SRI",
+    juicio:"13301-2024-00456",
+    fecha:"2025-06-18", cuantia:156780.00,
+    tribunal:"Tribunal Distrital de lo Contencioso Tributario con sede en Portoviejo",
+    juez:"Dr. Luis Alberto Zambrano Mendoza",
+    jueces:["Dr. Luis Alberto Zambrano Mendoza","Dra. Carmen Lucía Loor Cedeño"],
+    recurrentes:["ATUNERA DEL PACIFICO S.A."],
+    causales:[],
+    accion:"Pago en exceso", categoria:"Reclamos administrativos", subcat:"Pago en exceso",
+    decision:"Acepta el recurso", decisionTipo:"acepta",
+    voto:"Sin voto salvado", estado:"Ejecutoriado",
+    antecedentes:"Reclamo de pago en exceso de anticipo del Impuesto a la Renta por cambio en la situación económica de la empresa durante el ejercicio fiscal.",
+    argRecurrente:"La disminución significativa de ingresos durante el ejercicio justifica la reducción del anticipo y la devolución del exceso pagado.",
+    argContraparte:"El SRI sostiene que los parámetros de cálculo se basan en el ejercicio anterior y que la devolución no procede automáticamente.",
+    criterio:"El Tribunal aplica la jurisprudencia de la CNJ sobre devolución del anticipo cuando excede el impuesto causado, acreditándose documentalmente la situación excepcional.",
+    jurisprudencia:["Sentencia 17751-2018-00412"],
+    medidas:"Devolución con intereses.",
+    observaciones:""
+  },
+  {
+    id:15, tipo:"instancia", entidad:"SENAE",
+    juicio:"01801-2024-00178",
+    fecha:"2025-05-30", cuantia:389240.00,
+    tribunal:"Tribunal Distrital de lo Contencioso Tributario con sede en Cuenca",
+    juez:"Dra. Patricia Eugenia Vázquez Calderón",
+    jueces:["Dra. Patricia Eugenia Vázquez Calderón","Dr. Fernando Patricio Malo Larrea"],
+    recurrentes:["INDUSTRIAS AUSTRALES S.A."],
+    causales:[],
+    accion:"Impugnación", categoria:"Procedimientos sancionatorios", subcat:"Defraudación aduanera",
+    decision:"Acepta parcialmente", decisionTipo:"parcial",
+    voto:"Sin voto salvado", estado:"En apelación",
+    antecedentes:"Impugnación de sanción aduanera por presunta subvaloración en importaciones de maquinaria industrial y aplicación de multas equivalentes al 200% del tributo presuntamente eludido.",
+    argRecurrente:"Inexistencia del elemento subjetivo (dolo) requerido para configurar la defraudación aduanera y desproporcionalidad de la sanción.",
+    argContraparte:"El SENAE sostiene que existen elementos indiciarios suficientes de la conducta dolosa y que la sanción está ajustada a la ley.",
+    criterio:"El Tribunal reconoce la existencia de irregularidades en la valoración pero considera que no se acreditó el dolo específico, por lo que recalifica la conducta a una infracción aduanera menor con sanción reducida.",
+    jurisprudencia:[],
+    medidas:"Reducción de la sanción a los parámetros de la contravención aduanera.",
+    observaciones:""
+  },
+  {
+    id:16, tipo:"casacion", entidad:"SRI",
+    juicio:"17751-2024-00112",
+    fecha:"2025-05-08", cuantia:2340000.00,
+    tribunal:"Sala Especializada de lo Contencioso Tributario de la CNJ",
+    juez:"Dr. Álvaro Ojeda Hidalgo",
+    jueces:["Dr. Álvaro Ojeda Hidalgo","Dra. Ana María Crespo Santos","Dr. Javier de los Reyes Suárez"],
+    recurrentes:["CEMENTOS ANDINOS S.A."],
+    causales:["Causal 4 - Apreciación de la prueba"],
+    accion:"Impugnación", categoria:"Determinación", subcat:"Presuntiva",
+    decision:"Casa la sentencia", decisionTipo:"acepta",
+    voto:"Sin voto salvado", estado:"Ejecutoriado",
+    antecedentes:"Controversia sobre determinación presuntiva del Impuesto a la Renta del ejercicio 2019 en base a coeficientes sectoriales que la administración aplicó por presunta insuficiencia probatoria del contribuyente.",
+    argRecurrente:"Errónea apreciación de la prueba documental y pericial que acredita la realidad económica del contribuyente contraria a los coeficientes aplicados.",
+    argContraparte:"El SRI defiende la aplicación de la determinación presuntiva como método subsidiario ante la falta de documentación suficiente.",
+    criterio:"La Sala establece que la determinación presuntiva es excepcional y debe ceder cuando el contribuyente aporta elementos suficientes que permiten la determinación directa, como ocurre en el presente caso.",
+    jurisprudencia:["Sentencia 17751-2021-00089"],
+    medidas:"Se ordena nueva determinación sobre base cierta con los elementos aportados.",
+    observaciones:""
+  },
+  {
+    id:17, tipo:"instancia", entidad:"GADS",
+    juicio:"17510-2023-00634",
+    fecha:"2025-04-22", cuantia:87650.00,
+    tribunal:"Tribunal Distrital de lo Contencioso Tributario con sede en Quito",
+    juez:"Dr. Carlos Xavier Pazmiño Mena",
+    jueces:["Dr. Carlos Xavier Pazmiño Mena","Dra. Silvana Mariela Bustos López","Dr. Luis Fernando Cevallos Andrade"],
+    recurrentes:["INMOBILIARIA PANORAMA S.A."],
+    causales:[],
+    accion:"Impugnación", categoria:"Determinación", subcat:"Predios urbanos",
+    decision:"Acepta el recurso", decisionTipo:"acepta",
+    voto:"Sin voto salvado", estado:"Ejecutoriado",
+    antecedentes:"Impugnación de avalúo municipal y consecuente impuesto predial urbano por sobrevaloración del inmueble respecto a los parámetros técnicos y de mercado aplicables al sector.",
+    argRecurrente:"El avalúo catastral excede el valor comercial del inmueble y no responde a los parámetros técnicos establecidos en la metodología oficial.",
+    argContraparte:"El Municipio sostiene que el avalúo se realizó conforme a la metodología aprobada y refleja el valor real del bien.",
+    criterio:"El Tribunal acepta la prueba pericial aportada por la contribuyente que acredita la sobrevaloración y ordena el recálculo con los parámetros técnicos adecuados.",
+    jurisprudencia:[],
+    medidas:"Rectificación del avalúo y recálculo del impuesto.",
+    observaciones:""
+  },
+  {
+    id:18, tipo:"casacion", entidad:"SRI",
+    juicio:"17751-2022-00734",
+    fecha:"2025-04-03", cuantia:5620000.00,
+    tribunal:"Sala Especializada de lo Contencioso Tributario de la CNJ",
+    juez:"Dr. José Luis Terán Suárez",
+    jueces:["Dr. José Luis Terán Suárez","Dra. María del Carmen Espinosa Valdivieso","Dr. Álvaro Ojeda Hidalgo"],
+    recurrentes:["PETROECUADOR EP"],
+    causales:["Causal 2 - Falta de aplicación","Causal 3 - Errónea interpretación"],
+    accion:"Impugnación", categoria:"Determinación", subcat:"Mixta",
+    decision:"Casa la sentencia", decisionTipo:"acepta",
+    voto:"Con voto salvado", estado:"Ejecutoriado",
+    antecedentes:"Controversia sobre el tratamiento tributario de los ingresos petroleros y la aplicabilidad de regímenes especiales previstos en la normativa hidrocarburífera respecto del régimen general del Impuesto a la Renta.",
+    argRecurrente:"Falta de aplicación de las normas especiales del régimen hidrocarburífero y errónea interpretación de la LRTI respecto a las actividades estratégicas del Estado.",
+    argContraparte:"El SRI sostiene que el régimen general es aplicable y que las particularidades invocadas no configuran un régimen especial excluyente.",
+    criterio:"La Sala reconoce la existencia de un régimen tributario especial para las empresas públicas del sector hidrocarburífero y ordena reliquidar conforme a dichos parámetros.",
+    jurisprudencia:["Ley de Hidrocarburos","LOEP"],
+    medidas:"Nueva determinación bajo el régimen especial aplicable.",
+    observaciones:"Decisión de alto impacto para empresas públicas estratégicas.",
+    votoSalvadoJuez:"Dr. Álvaro Ojeda Hidalgo",
+    votoSalvadoArg:"Considera que el régimen general debe aplicarse y que no existe exención expresa que justifique el tratamiento especial pretendido."
+  },
+  {
+    id:19, tipo:"instancia", entidad:"SRI",
+    juicio:"13301-2023-00987",
+    fecha:"2025-03-15", cuantia:34560.00,
+    tribunal:"Tribunal Distrital de lo Contencioso Tributario con sede en Portoviejo",
+    juez:"Dra. Carmen Lucía Loor Cedeño",
+    jueces:["Dra. Carmen Lucía Loor Cedeño","Dr. Luis Alberto Zambrano Mendoza"],
+    recurrentes:["COOPERATIVA DE AHORRO Y CRÉDITO MANABÍ LTDA."],
+    causales:[],
+    accion:"Impugnación", categoria:"Recurso de revisión", subcat:"A petición de parte",
+    decision:"Inadmite", decisionTipo:"inadmite",
+    voto:"Sin voto salvado", estado:"Archivado",
+    antecedentes:"Solicitud de recurso de revisión presentada fuera del plazo legal y sin acreditación de los supuestos excepcionales previstos en el art. 143 del Código Tributario.",
+    argRecurrente:"Invoca la existencia de nuevos elementos probatorios descubiertos con posterioridad a la firmeza del acto.",
+    argContraparte:"El SRI sostiene que los elementos invocados no son nuevos y que el plazo para la interposición del recurso se encuentra caducado.",
+    criterio:"El Tribunal verifica el vencimiento del plazo para la interposición del recurso y la ausencia de los supuestos excepcionales invocados.",
+    jurisprudencia:[],
+    medidas:"",
+    observaciones:""
+  },
+  {
+    id:20, tipo:"casacion", entidad:"GADS",
+    juicio:"17751-2024-00267",
+    fecha:"2025-02-20", cuantia:456780.00,
+    tribunal:"Sala Especializada de lo Contencioso Tributario de la CNJ",
+    juez:"Dr. Javier de los Reyes Suárez",
+    jueces:["Dr. Javier de los Reyes Suárez","Dra. Ana María Crespo Santos","Dr. José Luis Terán Suárez"],
+    recurrentes:["GAD MUNICIPAL DEL CANTÓN AMBATO"],
+    causales:["Causal 3 - Errónea interpretación"],
+    accion:"Impugnación", categoria:"Extinción de obligaciones", subcat:"Prescripción",
+    decision:"No casa la sentencia", decisionTipo:"niega",
+    voto:"Sin voto salvado", estado:"Ejecutoriado",
+    antecedentes:"Controversia sobre la prescripción de obligaciones tributarias municipales y la interpretación de los actos interruptivos de la prescripción previstos en el Código Tributario y el COOTAD.",
+    argRecurrente:"Errónea interpretación del art. 55 del Código Tributario al desconocer la eficacia interruptiva de las notificaciones edictales.",
+    argContraparte:"El contribuyente sostiene que las notificaciones edictales en el caso concreto no cumplían los requisitos legales.",
+    criterio:"La Sala confirma el criterio del tribunal inferior sobre la ineficacia de las notificaciones edictales que no cumplen los requisitos de publicidad y agotamiento de la notificación personal.",
+    jurisprudencia:["Sentencia 17751-2020-00112"],
+    medidas:"",
+    observaciones:"Sentencia relevante para GADs respecto al procedimiento de notificaciones."
+  },
+  {
+    id:21, tipo:"instancia", entidad:"SENAE",
+    juicio:"09501-2025-00034",
+    fecha:"2026-01-10", cuantia:178900.00,
+    tribunal:"Tribunal Distrital de lo Contencioso Tributario con sede en Guayaquil",
+    juez:"Dra. Verónica Elizabeth Hernández Pérez",
+    jueces:["Dra. Verónica Elizabeth Hernández Pérez","Dr. Jorge Andrés Blum Carcelén","Dra. Mónica Alexandra Cárdenas Pineda"],
+    recurrentes:["AGROINDUSTRIAS COSTA S.A."],
+    causales:[],
+    accion:"Impugnación", categoria:"Controles aduaneros", subcat:"Aforo físico",
+    decision:"Acepta el recurso", decisionTipo:"acepta",
+    voto:"Sin voto salvado", estado:"Ejecutoriado",
+    antecedentes:"Impugnación de observaciones efectuadas durante el aforo físico de una importación de maquinaria agrícola con aplicación de aranceles superiores por presunta discordancia con la documentación.",
+    argRecurrente:"Inexistencia de discordancia entre la mercancía aforada y la documentación presentada, acreditada mediante peritaje técnico independiente.",
+    argContraparte:"El SENAE sostiene que existen diferencias físicas relevantes respecto a lo declarado que justifican el ajuste.",
+    criterio:"El Tribunal valora el peritaje técnico independiente y los registros fotográficos del aforo concluyendo que no existe discordancia material que justifique el ajuste arancelario.",
+    jurisprudencia:[],
+    medidas:"Se ordena la reliquidación y devolución de los valores cobrados en exceso.",
+    observaciones:""
+  },
+  {
+    id:22, tipo:"instancia", entidad:"GADS",
+    juicio:"17510-2025-00089",
+    fecha:"2026-02-14", cuantia:12890.00,
+    tribunal:"Tribunal Distrital de lo Contencioso Tributario con sede en Quito",
+    juez:"Dra. Silvana Mariela Bustos López",
+    jueces:["Dra. Silvana Mariela Bustos López","Dr. Carlos Xavier Pazmiño Mena","Dr. Luis Fernando Cevallos Andrade"],
+    recurrentes:["COMERCIAL DEL NORTE CIA. LTDA."],
+    causales:[],
+    accion:"Acción directa", categoria:"Impuesto de patentes", subcat:"Determinación",
+    decision:"Niega el recurso", decisionTipo:"niega",
+    voto:"Sin voto salvado", estado:"Ejecutoriado",
+    antecedentes:"Acción directa contra resolución municipal sobre determinación del impuesto de patentes por periodos 2021-2023 con aplicación de intereses y recargos por declaración tardía.",
+    argRecurrente:"Invoca error excusable y solicita la inaplicación de intereses y recargos por la complejidad normativa aplicable a su actividad.",
+    argContraparte:"El Municipio sostiene que la normativa aplicable es clara y que el error invocado no reúne los parámetros de excusabilidad.",
+    criterio:"El Tribunal considera que el error invocado no reúne los requisitos jurisprudenciales para configurar un error excusable que justifique la inaplicación de recargos.",
+    jurisprudencia:[],
+    medidas:"",
+    observaciones:""
+  }
+];
+
+/* =============== ESTADO DE LA APP =============== */
+let state = {
+  view:"home",
+  filters:{
+    keyword:"", instancia:"all", entidad:"all",
+    fechaDesde:"", fechaHasta:"",
+    tribunal:"all", juez:"all",
+    cuantiaDesde:"", cuantiaHasta:"",
+    accion:"all", decision:"all", voto:"all",
+    estado:"all", causal:"all",
+    categorias:[], categoriaNombre:""
+  },
+  orden:"fecha-desc"
+};
+
+/* =============== NAV =============== */
+function showView(v){
+  document.querySelectorAll('.view').forEach(el=>el.classList.remove('active'));
+  document.getElementById('view-'+v).classList.add('active');
+  state.view = v;
+  document.querySelectorAll('#mainNav a').forEach(a=>{
+    a.classList.toggle('active', a.dataset.nav === (v==='detail'?'search':v));
+  });
+  window.scrollTo({top:0, behavior:'instant'});
+}
+function goHome(){ showView('home'); }
+function goSearch(){ showView('search'); applyFilters(); }
+
+/* =============== HOME → SEARCH =============== */
+function openSearch(opts){
+  clearFilters(false);
+  if(opts.entidad){ state.filters.entidad = opts.entidad; document.getElementById('f-entidad').value = opts.entidad; document.getElementById('f-entidad-cat').value = opts.entidad; }
+  if(opts.categoria){ state.filters.categoriaNombre = opts.categoria; }
+  goSearch();
+}
+function runHeroSearch(){
+  const v = document.getElementById('heroInput').value;
+  clearFilters(false);
+  state.filters.keyword = v;
+  document.getElementById('f-keyword').value = v;
+  goSearch();
+}
+function runHeroSearchTerm(t){
+  document.getElementById('heroInput').value = t;
+  runHeroSearch();
+}
+
+/* =============== CASCADAS DE FILTROS =============== */
+function onInstanciaChange(){
+  const v = document.getElementById('f-instancia').value;
+  state.filters.instancia = v;
+  const tribSel = document.getElementById('f-tribunal');
+  const decSel = document.getElementById('f-decision');
+  const votoSel = document.getElementById('f-voto');
+  const causalSel = document.getElementById('f-causal');
+  tribSel.innerHTML = '<option value="all">Seleccionar Tribunal</option>';
+  if(v !== 'all'){
+    tribSel.disabled = false;
+    decSel.disabled = false;
+    votoSel.disabled = false;
+    causalSel.disabled = (v !== 'casacion');
+    TRIBUNALES_POR_INSTANCIA[v].forEach(t=>{
+      const o = document.createElement('option'); o.value = t; o.textContent = t; tribSel.appendChild(o);
+    });
+  } else {
+    tribSel.disabled = true; decSel.disabled = true; votoSel.disabled = true; causalSel.disabled = true;
+    document.getElementById('f-juez').disabled = true;
+  }
+  document.getElementById('f-juez').innerHTML = '<option value="all">Seleccionar Juez</option>';
+  document.getElementById('f-juez').disabled = true;
+  state.filters.tribunal = 'all'; state.filters.juez = 'all';
+  applyFilters();
+}
+
+function onTribunalChange(){
+  const v = document.getElementById('f-tribunal').value;
+  state.filters.tribunal = v;
+  const juezSel = document.getElementById('f-juez');
+  juezSel.innerHTML = '<option value="all">Seleccionar Juez</option>';
+  if(v !== 'all' && JUECES_POR_TRIBUNAL[v]){
+    juezSel.disabled = false;
+    JUECES_POR_TRIBUNAL[v].forEach(j=>{
+      const o = document.createElement('option'); o.value = j; o.textContent = j; juezSel.appendChild(o);
+    });
+  } else {
+    juezSel.disabled = true;
+  }
+  state.filters.juez = 'all';
+  applyFilters();
+}
+
+/* =============== TABS =============== */
+function showTab(t){
+  document.querySelectorAll('.tab').forEach(el=>el.classList.toggle('active', el.dataset.tab===t));
+  document.querySelectorAll('.panel').forEach(el=>el.classList.remove('active'));
+  document.getElementById('panel-'+t).classList.add('active');
+  if(t==='categorias') renderCategorias();
+}
+
+/* =============== CATEGORÍAS (panel) =============== */
+function renderCategorias(){
+  const ent = document.getElementById('f-entidad-cat').value;
+  const search = (document.getElementById('f-cat-search').value || '').toLowerCase();
+  const box = document.getElementById('catContainer');
+  if(ent === 'all'){
+    box.innerHTML = '<div class="cat-header" style="color:var(--muted); font-weight:400;">Selecciona una entidad para ver sus categorías</div>';
+    return;
+  }
+  const cats = CATEGORIES[ent] || [];
+  const filtered = cats.map(c=>{
+    const parentMatches = c.name.toLowerCase().includes(search);
+    const hijos = c.hijos.filter(h => h.toLowerCase().includes(search));
+    if(parentMatches) return c;
+    if(hijos.length>0) return {...c, hijos};
+    return null;
+  }).filter(Boolean);
+
+  const total = filtered.reduce((a,c)=>a + 1 + c.hijos.length, 0);
+  let html = `<div class="cat-header">Categorías - ${ent} (${total})</div><div class="cat-list">`;
+  filtered.forEach((c,i)=>{
+    const id = `cat_${ent}_${i}`;
+    const checked = state.filters.categorias.includes(c.name) ? 'checked' : '';
+    html += `<div class="cat-item">
+      <input type="checkbox" id="${id}" ${checked} onchange="toggleCategoria('${c.name}', this.checked)" />
+      <label for="${id}">${c.name}</label>
+    </div>`;
+    c.hijos.forEach((h,j)=>{
+      const idh = `cat_${ent}_${i}_${j}`;
+      const ch = state.filters.categorias.includes(h) ? 'checked' : '';
+      html += `<div class="cat-item cat-child">
+        <input type="checkbox" id="${idh}" ${ch} onchange="toggleCategoria('${h}', this.checked)" />
+        <label for="${idh}">${h}</label>
+      </div>`;
+    });
+  });
+  html += '</div>';
+  if(filtered.length === 0 && search){
+    html = `<div class="cat-header" style="color:var(--muted); font-weight:400;">Sin resultados para "${search}"</div>`;
+  }
+  box.innerHTML = html;
+}
+function toggleCategoria(name, checked){
+  if(checked) state.filters.categorias.push(name);
+  else state.filters.categorias = state.filters.categorias.filter(c=>c!==name);
+  applyFilters();
+}
+
+/* =============== FILTRADO =============== */
+function readFilters(){
+  state.filters.keyword     = (document.getElementById('f-keyword')?.value || '').trim().toLowerCase();
+  state.filters.instancia   = document.getElementById('f-instancia')?.value || 'all';
+  state.filters.entidad     = document.getElementById('f-entidad')?.value || 'all';
+  state.filters.fechaDesde  = document.getElementById('f-fecha-desde')?.value || '';
+  state.filters.fechaHasta  = document.getElementById('f-fecha-hasta')?.value || '';
+  state.filters.tribunal    = document.getElementById('f-tribunal')?.value || 'all';
+  state.filters.juez        = document.getElementById('f-juez')?.value || 'all';
+  state.filters.cuantiaDesde = document.getElementById('f-cuantia-desde')?.value || '';
+  state.filters.cuantiaHasta = document.getElementById('f-cuantia-hasta')?.value || '';
+  state.filters.accion      = document.getElementById('f-accion')?.value || 'all';
+  state.filters.decision    = document.getElementById('f-decision')?.value || 'all';
+  state.filters.voto        = document.getElementById('f-voto')?.value || 'all';
+  state.filters.estado      = document.getElementById('f-estado')?.value || 'all';
+  state.filters.causal      = document.getElementById('f-causal')?.value || 'all';
+  state.orden = document.getElementById('f-orden')?.value || 'fecha-desc';
+}
+
+function applyFilters(){
+  readFilters();
+  const f = state.filters;
+  let out = DATA.filter(d=>{
+    if(f.keyword){
+      const blob = (d.juicio+' '+d.juez+' '+d.tribunal+' '+(d.recurrentes||[]).join(' ')+' '+(d.antecedentes||'')+' '+(d.categoria||'')+' '+(d.accion||'')).toLowerCase();
+      if(!blob.includes(f.keyword)) return false;
+    }
+    if(f.instancia !== 'all' && d.tipo !== f.instancia) return false;
+    if(f.entidad !== 'all' && d.entidad !== f.entidad) return false;
+    if(f.tribunal !== 'all' && d.tribunal !== f.tribunal) return false;
+    if(f.juez !== 'all' && d.juez !== f.juez) return false;
+    if(f.accion !== 'all' && d.accion !== f.accion) return false;
+    if(f.decision !== 'all' && d.decision !== f.decision) return false;
+    if(f.voto !== 'all'){
+      if(f.voto === 'Con voto salvado' && d.voto !== 'Con voto salvado') return false;
+      if(f.voto === 'Sin voto salvado' && d.voto !== 'Sin voto salvado') return false;
+    }
+    if(f.estado !== 'all' && d.estado !== f.estado) return false;
+    if(f.causal !== 'all' && !(d.causales||[]).some(c=>c===f.causal)) return false;
+    if(f.fechaDesde && d.fecha < f.fechaDesde) return false;
+    if(f.fechaHasta && d.fecha > f.fechaHasta) return false;
+    if(f.cuantiaDesde && d.cuantia < parseFloat(f.cuantiaDesde)) return false;
+    if(f.cuantiaHasta && d.cuantia > parseFloat(f.cuantiaHasta)) return false;
+    if(f.categorias.length && !f.categorias.includes(d.categoria) && !f.categorias.includes(d.subcat)) return false;
+    if(f.categoriaNombre && d.categoria !== f.categoriaNombre) return false;
+    return true;
+  });
+
+  out.sort((a,b)=>{
+    switch(state.orden){
+      case 'fecha-asc':  return a.fecha.localeCompare(b.fecha);
+      case 'cuantia-desc': return b.cuantia - a.cuantia;
+      case 'cuantia-asc':  return a.cuantia - b.cuantia;
+      default: return b.fecha.localeCompare(a.fecha);
+    }
+  });
+
+  document.getElementById('resCount').textContent = out.length;
+  renderChips();
+  renderResults(out);
+}
+
+function renderChips(){
+  const f = state.filters;
+  const chips = [];
+  if(f.keyword) chips.push({k:'keyword', lbl:`Palabra: "${f.keyword}"`});
+  if(f.instancia !== 'all') chips.push({k:'instancia', lbl:`Instancia: ${f.instancia === 'casacion' ? 'Casación (CNJ)' : 'Instancia'}`});
+  if(f.entidad !== 'all') chips.push({k:'entidad', lbl:`Entidad: ${f.entidad}`});
+  if(f.categoriaNombre) chips.push({k:'categoriaNombre', lbl:`Categoría: ${f.categoriaNombre}`});
+  if(f.tribunal !== 'all') chips.push({k:'tribunal', lbl:`Tribunal: ${f.tribunal.length>40?f.tribunal.slice(0,40)+'…':f.tribunal}`});
+  if(f.juez !== 'all') chips.push({k:'juez', lbl:`Juez: ${f.juez}`});
+  if(f.accion !== 'all') chips.push({k:'accion', lbl:`Acción: ${f.accion}`});
+  if(f.decision !== 'all') chips.push({k:'decision', lbl:`Decisión: ${f.decision}`});
+  if(f.estado !== 'all') chips.push({k:'estado', lbl:`Estado: ${f.estado}`});
+  if(f.voto !== 'all') chips.push({k:'voto', lbl:`${f.voto}`});
+  if(f.causal !== 'all') chips.push({k:'causal', lbl:`${f.causal}`});
+  if(f.cuantiaDesde || f.cuantiaHasta) chips.push({k:'cuantia', lbl:`Cuantía: $${f.cuantiaDesde||'0'} – $${f.cuantiaHasta||'∞'}`});
+  if(f.fechaDesde || f.fechaHasta) chips.push({k:'fecha', lbl:`Fecha: ${f.fechaDesde||'—'} a ${f.fechaHasta||'—'}`});
+  f.categorias.forEach(c => chips.push({k:'catArr', val:c, lbl:`Categoría: ${c}`}));
+  const box = document.getElementById('activeFilters');
+  if(chips.length === 0){ box.innerHTML = ''; return; }
+  let html = '<span class="lbl">Filtros activos:</span>';
+  chips.forEach(c=>{
+    html += `<span class="chip">${c.lbl}<button onclick="removeChip('${c.k}','${c.val||''}')">✕</button></span>`;
+  });
+  html += `<button class="btn" style="font-size:11.5px; padding:4px 10px; margin-left:6px;" onclick="clearFilters(true)">Limpiar todo</button>`;
+  box.innerHTML = html;
+}
+
+function removeChip(k, val){
+  const f = state.filters;
+  if(k === 'keyword'){ f.keyword = ''; document.getElementById('f-keyword').value=''; }
+  if(k === 'instancia'){ document.getElementById('f-instancia').value = 'all'; onInstanciaChange(); return; }
+  if(k === 'entidad'){ document.getElementById('f-entidad').value = 'all'; }
+  if(k === 'categoriaNombre'){ f.categoriaNombre = ''; }
+  if(k === 'tribunal'){ document.getElementById('f-tribunal').value = 'all'; onTribunalChange(); return; }
+  if(k === 'juez'){ document.getElementById('f-juez').value = 'all'; }
+  if(k === 'accion'){ document.getElementById('f-accion').value = 'all'; }
+  if(k === 'decision'){ document.getElementById('f-decision').value = 'all'; }
+  if(k === 'estado'){ document.getElementById('f-estado').value = 'all'; }
+  if(k === 'voto'){ document.getElementById('f-voto').value = 'all'; }
+  if(k === 'causal'){ document.getElementById('f-causal').value = 'all'; }
+  if(k === 'cuantia'){ document.getElementById('f-cuantia-desde').value=''; document.getElementById('f-cuantia-hasta').value=''; }
+  if(k === 'fecha'){ document.getElementById('f-fecha-desde').value=''; document.getElementById('f-fecha-hasta').value=''; }
+  if(k === 'catArr'){ f.categorias = f.categorias.filter(c=>c!==val); renderCategorias(); }
+  applyFilters();
+}
+
+function clearFilters(refresh){
+  state.filters = {
+    keyword:"", instancia:"all", entidad:"all",
+    fechaDesde:"", fechaHasta:"",
+    tribunal:"all", juez:"all",
+    cuantiaDesde:"", cuantiaHasta:"",
+    accion:"all", decision:"all", voto:"all",
+    estado:"all", causal:"all",
+    categorias:[], categoriaNombre:""
+  };
+  ['f-keyword','f-fecha-desde','f-fecha-hasta','f-cuantia-desde','f-cuantia-hasta','f-cat-search'].forEach(id=>{
+    const el = document.getElementById(id); if(el) el.value = '';
+  });
+  ['f-instancia','f-entidad','f-entidad-cat','f-tribunal','f-juez','f-accion','f-decision','f-voto','f-estado','f-causal','f-orden'].forEach(id=>{
+    const el = document.getElementById(id); if(el) el.value = (id==='f-orden'?'fecha-desc':'all');
+  });
+  document.getElementById('f-tribunal').disabled = true;
+  document.getElementById('f-juez').disabled = true;
+  document.getElementById('f-decision').disabled = true;
+  document.getElementById('f-voto').disabled = true;
+  document.getElementById('f-causal').disabled = true;
+  renderCategorias();
+  if(refresh !== false) applyFilters();
+}
+
+/* =============== RENDER RESULTADOS =============== */
+function renderResults(list){
+  const box = document.getElementById('resultsList');
+  if(list.length === 0){
+    box.innerHTML = `<div class="no-results">
+      <div style="font-size:36px;">🔍</div>
+      <h3>Sin resultados</h3>
+      <p>Ajusta los filtros para ampliar tu búsqueda.</p>
+      <button class="btn" style="margin-top:10px;" onclick="clearFilters(true)">Limpiar filtros</button>
+    </div>`;
+    return;
+  }
+  let html = '';
+  list.forEach(d=>{
+    const tipoLabel = d.tipo === 'casacion' ? 'CASACIÓN CNJ' : 'INSTANCIA';
+    const fecha = formatDate(d.fecha);
+    const cuantia = formatMoney(d.cuantia);
+    const preview = (d.antecedentes||'').slice(0, 220) + ((d.antecedentes||'').length>220?'…':'');
+    html += `
+      <div class="result-card is-${d.tipo}" onclick="openDetail(${d.id})">
+        <div class="rc-top">
+          <div class="rc-badges">
+            <span class="badge ${d.tipo}">${tipoLabel}</span>
+            <span class="badge entidad">${d.entidad}</span>
+            <span class="badge entidad" style="background:var(--primary-100); color:var(--primary-800); border:0;">${d.categoria}</span>
+          </div>
+          <div class="rc-date">📅 ${fecha}</div>
+        </div>
+        <div class="rc-juicio">${d.juicio}</div>
+        <div class="rc-juez"><strong>${d.tipo==='casacion'?'Ponente:':'Juez:'}</strong> ${d.juez}</div>
+        <div class="rc-preview">${preview}</div>
+        <div class="rc-foot">
+          <div class="rc-meta">
+            <span><strong>Tribunal:</strong> ${abbrev(d.tribunal,36)}</span>
+            <span><strong>Cuantía:</strong> ${cuantia}</span>
+            <span><strong>Acción:</strong> ${d.accion}</span>
+          </div>
+          <span class="rc-decision ${d.decisionTipo}">${d.decision}</span>
+        </div>
+      </div>`;
+  });
+  box.innerHTML = html;
+}
+
+/* =============== DETALLE =============== */
+function openDetail(id){
+  const d = DATA.find(x=>x.id===id); if(!d) return;
+  const tipoLabel = d.tipo === 'casacion' ? 'CASACIÓN CNJ' : 'INSTANCIA';
+  const decisionBox = `<div class="decision-box ${d.decisionTipo}">${d.decision}</div>`;
+
+  let partesHtml = '';
+  d.recurrentes.forEach(r=>{ partesHtml += `<div class="info-row"><div class="k">Parte recurrente</div><div class="v">${r}</div></div>`;});
+  partesHtml += `<div class="info-row"><div class="k">Administración tributaria</div><div class="v">${d.entidad}</div></div>`;
+
+  let causalHtml = '';
+  if(d.causales && d.causales.length){
+    causalHtml = `<div class="card"><h3>Causales invocadas</h3><div class="pill-list">${d.causales.map(c=>`<span class="pill">${c}</span>`).join('')}</div></div>`;
+  }
+
+  let jurHtml = '';
+  if(d.jurisprudencia && d.jurisprudencia.length){
+    jurHtml = `<div class="card"><h3>Jurisprudencia mencionada</h3><ul>${d.jurisprudencia.map(j=>`<li>${j}</li>`).join('')}</ul></div>`;
+  }
+
+  let votoHtml = '';
+  if(d.votoSalvadoJuez){
+    votoHtml = `<div class="card"><h3>Voto salvado — ${d.votoSalvadoJuez}</h3><p>${d.votoSalvadoArg}</p></div>`;
+  }
+
+  let medidasHtml = '';
+  if(d.medidas){
+    medidasHtml = `<div class="card"><h3>Medidas adicionales</h3><p>${d.medidas}</p></div>`;
+  }
+  let obsHtml = '';
+  if(d.observaciones){
+    obsHtml = `<div class="card"><h3>Observaciones</h3><p>${d.observaciones}</p></div>`;
+  }
+
+  document.getElementById('detailShell').innerHTML = `
+    <div class="detail-head">
+      <div class="crumb">
+        <a onclick="goHome()">Inicio</a> <span>/</span>
+        <a onclick="goSearch()">Buscador</a> <span>/</span>
+        <strong>${d.juicio}</strong>
+      </div>
+      <div style="display:flex; gap:8px; margin-bottom:6px;">
+        <span class="badge ${d.tipo}">${tipoLabel}</span>
+        <span class="badge entidad">${d.entidad}</span>
+      </div>
+      <h1>${d.juicio}</h1>
+      <div class="detail-meta">
+        <span><strong>📅</strong> ${formatDate(d.fecha)}</span>
+        <span><strong>⚖️</strong> ${d.tribunal}</span>
+        <span><strong>💰</strong> ${formatMoney(d.cuantia)}</span>
+        <span><strong>📋</strong> ${d.estado}</span>
+      </div>
+      <div class="detail-actions">
+        <button class="btn primary" onclick="alert('Demo: descarga DOCX')">⬇ Descargar Word</button>
+        <button class="btn" onclick="alert('Demo: compartir enlace')">🔗 Compartir</button>
+        <button class="btn" onclick="alert('Demo: agregar a favoritos')">⭐ Guardar</button>
+        <button class="btn" onclick="alert('Demo: generar cita APA')">📎 Citar</button>
+      </div>
+    </div>
+
+    <div class="detail-grid">
+      <div>
+        <div class="card">
+          <h3>Partes del proceso</h3>
+          ${partesHtml}
+          <div class="info-row"><div class="k">Tipo de acción</div><div class="v">${d.accion}</div></div>
+          <div class="info-row"><div class="k">Categoría</div><div class="v"><span class="pill">${d.categoria}</span> ${d.subcat?`<span class="pill violet">${d.subcat}</span>`:''}</div></div>
+          <div class="info-row"><div class="k">${d.tipo==='casacion'?'Juez ponente':'Juez sustanciador'}</div><div class="v">${d.juez}</div></div>
+          <div class="info-row"><div class="k">Panel de jueces</div><div class="v"><div class="pill-list">${(d.jueces||[]).map(j=>`<span class="pill violet">${j}</span>`).join('')}</div></div></div>
+          <div class="info-row"><div class="k">Voto salvado</div><div class="v">${d.voto}</div></div>
+        </div>
+
+        <div class="card">
+          <h3>Antecedentes</h3>
+          <p>${d.antecedentes}</p>
+        </div>
+
+        ${causalHtml}
+
+        <div class="card">
+          <h3>Argumentos del recurrente</h3>
+          <p>${d.argRecurrente}</p>
+        </div>
+
+        <div class="card">
+          <h3>Argumentos de la contraparte</h3>
+          <p>${d.argContraparte}</p>
+        </div>
+
+        <div class="card">
+          <h3>Criterio de la Sala para resolver</h3>
+          <p>${d.criterio}</p>
+        </div>
+
+        ${jurHtml}
+        ${votoHtml}
+        ${medidasHtml}
+        ${obsHtml}
+      </div>
+
+      <aside>
+        <div class="aside-card">
+          <h4>Decisión final</h4>
+          ${decisionBox}
+          <h4>Estado</h4>
+          <p style="font-size:13.5px; margin:0 0 14px;">${d.estado}</p>
+          <h4>Cronología</h4>
+          <div class="timeline">
+            <div class="timeline-item">
+              <div class="ti-date">${formatDate(d.fecha)}</div>
+              <div class="ti-text">Sentencia emitida</div>
+            </div>
+            <div class="timeline-item">
+              <div class="ti-date">Etapa previa</div>
+              <div class="ti-text">Alegatos y prueba</div>
+            </div>
+            <div class="timeline-item">
+              <div class="ti-date">Inicio del proceso</div>
+              <div class="ti-text">${d.tipo==='casacion'?'Interposición del recurso':'Presentación de la demanda'}</div>
+            </div>
+          </div>
+        </div>
+        <div class="aside-card">
+          <h4>Acciones rápidas</h4>
+          <button class="btn" style="width:100%; margin-bottom:6px;" onclick="alert('Demo: ver sentencia original')">📄 Sentencia original (PDF)</button>
+          <button class="btn" style="width:100%; margin-bottom:6px;" onclick="alert('Demo: ver casos similares')">🔍 Casos similares</button>
+          <button class="btn" style="width:100%;" onclick="goSearch()">← Volver al buscador</button>
+        </div>
+      </aside>
+    </div>
+  `;
+  showView('detail');
+}
+
+/* =============== HELPERS =============== */
+function formatDate(s){
+  const d = new Date(s+'T00:00:00');
+  const meses = ['ene','feb','mar','abr','may','jun','jul','ago','sep','oct','nov','dic'];
+  return `${d.getDate()} ${meses[d.getMonth()]} ${d.getFullYear()}`;
+}
+function formatMoney(n){
+  return '$' + n.toLocaleString('es-EC', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+function abbrev(s, max){ return s && s.length>max ? s.slice(0,max)+'…' : s; }
+
+/* =============== HOME RECIENTES =============== */
+function renderRecent(){
+  const recent = [...DATA].sort((a,b)=>b.fecha.localeCompare(a.fecha)).slice(0,5);
+  let html = '';
+  recent.forEach(d=>{
+    const tipoLabel = d.tipo === 'casacion' ? 'CASACIÓN CNJ' : 'INSTANCIA';
+    html += `
+      <div class="result-card is-${d.tipo}" onclick="openDetail(${d.id})">
+        <div class="rc-top">
+          <div class="rc-badges">
+            <span class="badge ${d.tipo}">${tipoLabel}</span>
+            <span class="badge entidad">${d.entidad}</span>
+            <span class="badge entidad" style="background:var(--primary-100); color:var(--primary-800); border:0;">${d.categoria}</span>
+          </div>
+          <div class="rc-date">📅 ${formatDate(d.fecha)}</div>
+        </div>
+        <div class="rc-juicio">${d.juicio}</div>
+        <div class="rc-juez"><strong>${d.tipo==='casacion'?'Ponente:':'Juez:'}</strong> ${d.juez}</div>
+        <div class="rc-preview">${(d.antecedentes||'').slice(0,200)}…</div>
+        <div class="rc-foot">
+          <div class="rc-meta">
+            <span><strong>Cuantía:</strong> ${formatMoney(d.cuantia)}</span>
+            <span><strong>Acción:</strong> ${d.accion}</span>
+          </div>
+          <span class="rc-decision ${d.decisionTipo}">${d.decision}</span>
+        </div>
+      </div>`;
+  });
+  document.getElementById('recentList').innerHTML = html;
+}
+
+/* =============== INIT =============== */
+renderRecent();
+applyFilters();
+</script>
+
+</body>
+</html>
