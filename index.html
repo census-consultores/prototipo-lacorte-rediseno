@@ -491,6 +491,115 @@
     border-bottom:1px solid var(--primary-700);
   }
   .proto-banner span{ background:#000; color:var(--primary-500); padding:2px 8px; border-radius:4px; font-size:10px; margin-right:8px; letter-spacing:1px; }
+
+  /* =========================================================
+     DRAWER DE DETALLE (panel lateral superpuesto)
+     ========================================================= */
+  .detail-backdrop{
+    position:fixed; inset:0;
+    background:rgba(0,0,0,0.42);
+    z-index:80;
+    opacity:0; pointer-events:none;
+    transition:opacity .25s ease;
+  }
+  .detail-backdrop.open{ opacity:1; pointer-events:auto; }
+
+  .detail-drawer{
+    position:fixed; top:0; right:0; bottom:0;
+    width:min(760px, 60vw);
+    background:#fff;
+    z-index:90;
+    box-shadow:-16px 0 48px rgba(0,0,0,0.18);
+    transform:translateX(100%);
+    transition:transform .32s cubic-bezier(.4,0,.2,1);
+    overflow-y:auto;
+  }
+  .detail-drawer.open{ transform:translateX(0); }
+  .drawer-head{
+    position:sticky; top:0; z-index:3;
+    background:#fff;
+    padding:14px 22px;
+    border-bottom:1px solid var(--line);
+    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  }
+  .drawer-close{
+    background:#fff; border:1px solid var(--line); border-radius:8px;
+    padding:7px 12px; font-size:13px; font-weight:500; color:var(--ink);
+    cursor:pointer; display:inline-flex; align-items:center; gap:6px;
+    transition:all .2s;
+  }
+  .drawer-close:hover{ background:var(--primary-50); border-color:var(--primary-500); }
+  .drawer-crumb{ font-size:12.5px; color:var(--muted); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .drawer-crumb strong{ color:var(--ink); font-family:'JetBrains Mono','SF Mono','Courier New',monospace; }
+  .drawer-body{ padding:22px 24px 48px; }
+  .drawer-body .detail-grid{ grid-template-columns:1fr; }
+  .drawer-body .aside-card{ position:static; }
+
+  @media (max-width:900px){
+    .detail-drawer{ width:100vw; }
+  }
+
+  /* =========================================================
+     BOTÓN CÓDIGO DECISIÓN (estilo app actual)
+     ========================================================= */
+  .rc-dcode-group{ display:flex; gap:6px; align-items:center; }
+  .rc-dcode{
+    min-width:44px; height:34px;
+    display:inline-flex; align-items:center; justify-content:center;
+    padding:0 10px;
+    border-radius:6px;
+    font-size:12.5px; font-weight:700; letter-spacing:.5px;
+    color:#fff; border:0; cursor:pointer;
+    transition:all .15s; position:relative;
+  }
+  .rc-dcode:hover{ transform:translateY(-1px); box-shadow:0 4px 10px rgba(0,0,0,.12); }
+  .rc-dcode.instancia{ background:var(--instancia); }
+  .rc-dcode.casacion{ background:var(--casacion); color:#000; }
+  .rc-dcode.inadmite{ background:#888; }
+  .rc-dcode.pendiente{ background:#bbb; color:#333; }
+  .rc-dcode[data-tip]::after{
+    content:attr(data-tip);
+    position:absolute; top:calc(100% + 8px); right:0;
+    background:#111; color:#fff; padding:6px 10px; border-radius:6px;
+    font-size:11.5px; font-weight:500; letter-spacing:0;
+    white-space:nowrap; opacity:0; pointer-events:none;
+    transition:opacity .15s; z-index:50;
+  }
+  .rc-dcode:hover[data-tip]::after{ opacity:1; }
+
+  /* Ajuste en el foot del card: alinear código a la derecha */
+  .rc-foot-right{ display:flex; gap:10px; align-items:center; }
+
+  /* =========================================================
+     HOME: Pestañas de últimas sentencias por tribunal
+     ========================================================= */
+  .home-tabs{
+    display:flex; gap:0;
+    border-bottom:1px solid var(--line);
+    margin-bottom:18px;
+    overflow-x:auto;
+  }
+  .home-tab{
+    padding:12px 20px;
+    background:transparent; border:0;
+    border-bottom:3px solid transparent;
+    font-size:13.5px; font-weight:600; color:var(--muted);
+    white-space:nowrap; cursor:pointer; transition:all .2s;
+    display:inline-flex; align-items:center; gap:8px;
+  }
+  .home-tab.active{ color:var(--primary-800); border-bottom-color:var(--primary-500); }
+  .home-tab:hover:not(.active){ color:var(--ink); background:var(--primary-50); }
+  .home-tab .badge-count{
+    background:var(--primary-100); color:var(--primary-800);
+    font-size:10.5px; font-weight:700; padding:2px 8px; border-radius:999px;
+    letter-spacing:.5px;
+  }
+  .home-tab.active .badge-count{ background:var(--primary-500); color:#000; }
+
+  .tab-empty{
+    background:#fff; border:1px dashed var(--line); border-radius:10px;
+    padding:28px; text-align:center; color:var(--muted); font-size:13.5px;
+  }
 </style>
 </head>
 <body>
@@ -623,15 +732,48 @@
   <div class="section">
     <div class="section-head">
       <div>
-        <h2>Sentencias recientes</h2>
-        <p>Últimas resoluciones incorporadas a la base.</p>
+        <h2>Últimas sentencias emitidas</h2>
+        <p>Ordenadas por fecha de emisión del juez. Filtra por Corte Nacional o Tribunal Distrital.</p>
       </div>
       <button class="btn" onclick="goSearch()">Ver todas →</button>
     </div>
-    <div id="recentList"></div>
+
+    <div class="home-tabs" id="homeTabs">
+      <button class="home-tab active" data-key="cnj" onclick="showHomeTab('cnj')">
+        Corte Nacional de Justicia <span class="badge-count" id="cnt-cnj">·</span>
+      </button>
+      <button class="home-tab" data-key="quito" onclick="showHomeTab('quito')">
+        TDCT Quito <span class="badge-count" id="cnt-quito">·</span>
+      </button>
+      <button class="home-tab" data-key="guayaquil" onclick="showHomeTab('guayaquil')">
+        TDCT Guayaquil <span class="badge-count" id="cnt-guayaquil">·</span>
+      </button>
+      <button class="home-tab" data-key="cuenca" onclick="showHomeTab('cuenca')">
+        TDCT Cuenca <span class="badge-count" id="cnt-cuenca">·</span>
+      </button>
+      <button class="home-tab" data-key="portoviejo" onclick="showHomeTab('portoviejo')">
+        TDCT Portoviejo <span class="badge-count" id="cnt-portoviejo">·</span>
+      </button>
+    </div>
+
+    <div id="tabContent"></div>
   </div>
 
 </section>
+
+<!-- ==========================================================
+     DRAWER: DETALLE (side-panel overlay)
+     ========================================================== -->
+<div class="detail-backdrop" id="detailBackdrop" onclick="closeDetail()"></div>
+<aside class="detail-drawer" id="detailDrawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
+  <div class="drawer-head">
+    <button class="drawer-close" onclick="closeDetail()" aria-label="Cerrar detalle">
+      ← Volver
+    </button>
+    <div class="drawer-crumb" id="drawerCrumb"></div>
+  </div>
+  <div class="drawer-body" id="drawerBody"><!-- JS popula --></div>
+</aside>
 
 <!-- ==========================================================
      VIEW: BUSCADOR
@@ -817,15 +959,6 @@
 
       <div id="resultsList"></div>
     </div>
-  </div>
-</section>
-
-<!-- ==========================================================
-     VIEW: DETALLE
-     ========================================================== -->
-<section id="view-detail" class="view">
-  <div class="detail-shell" id="detailShell">
-    <!-- JS popula -->
   </div>
 </section>
 
@@ -1645,36 +1778,7 @@ function renderResults(list){
     </div>`;
     return;
   }
-  let html = '';
-  list.forEach(d=>{
-    const tipoLabel = d.tipo === 'casacion' ? 'CASACIÓN CNJ' : 'INSTANCIA';
-    const fecha = formatDate(d.fecha);
-    const cuantia = formatMoney(d.cuantia);
-    const preview = (d.antecedentes||'').slice(0, 220) + ((d.antecedentes||'').length>220?'…':'');
-    html += `
-      <div class="result-card is-${d.tipo}" onclick="openDetail(${d.id})">
-        <div class="rc-top">
-          <div class="rc-badges">
-            <span class="badge ${d.tipo}">${tipoLabel}</span>
-            <span class="badge entidad">${d.entidad}</span>
-            <span class="badge entidad" style="background:var(--primary-100); color:var(--primary-800); border:0;">${d.categoria}</span>
-          </div>
-          <div class="rc-date">📅 ${fecha}</div>
-        </div>
-        <div class="rc-juicio">${d.juicio}</div>
-        <div class="rc-juez"><strong>${d.tipo==='casacion'?'Ponente:':'Juez:'}</strong> ${d.juez}</div>
-        <div class="rc-preview">${preview}</div>
-        <div class="rc-foot">
-          <div class="rc-meta">
-            <span><strong>Tribunal:</strong> ${abbrev(d.tribunal,36)}</span>
-            <span><strong>Cuantía:</strong> ${cuantia}</span>
-            <span><strong>Acción:</strong> ${d.accion}</span>
-          </div>
-          <span class="rc-decision ${d.decisionTipo}">${d.decision}</span>
-        </div>
-      </div>`;
-  });
-  box.innerHTML = html;
+  box.innerHTML = list.map(resultCardHTML).join('');
 }
 
 /* =============== DETALLE =============== */
@@ -1711,18 +1815,16 @@ function openDetail(id){
     obsHtml = `<div class="card"><h3>Observaciones</h3><p>${d.observaciones}</p></div>`;
   }
 
-  document.getElementById('detailShell').innerHTML = `
+  document.getElementById('drawerCrumb').innerHTML =
+    `<strong>${d.juicio}</strong> · ${d.entidad} · ${formatDate(d.fecha)}`;
+
+  document.getElementById('drawerBody').innerHTML = `
     <div class="detail-head">
-      <div class="crumb">
-        <a onclick="goHome()">Inicio</a> <span>/</span>
-        <a onclick="goSearch()">Buscador</a> <span>/</span>
-        <strong>${d.juicio}</strong>
-      </div>
-      <div style="display:flex; gap:8px; margin-bottom:6px;">
+      <div style="display:flex; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
         <span class="badge ${d.tipo}">${tipoLabel}</span>
         <span class="badge entidad">${d.entidad}</span>
       </div>
-      <h1>${d.juicio}</h1>
+      <h1 id="drawerTitle" style="margin:4px 0 10px; font-size:22px; line-height:1.3;">${d.juicio}</h1>
       <div class="detail-meta">
         <span><strong>📅</strong> ${formatDate(d.fecha)}</span>
         <span><strong>⚖️</strong> ${d.tribunal}</span>
@@ -1739,6 +1841,11 @@ function openDetail(id){
 
     <div class="detail-grid">
       <div>
+        <div class="card">
+          <h3>Decisión final</h3>
+          ${decisionBox}
+        </div>
+
         <div class="card">
           <h3>Partes del proceso</h3>
           ${partesHtml}
@@ -1775,15 +1882,9 @@ function openDetail(id){
         ${votoHtml}
         ${medidasHtml}
         ${obsHtml}
-      </div>
 
-      <aside>
-        <div class="aside-card">
-          <h4>Decisión final</h4>
-          ${decisionBox}
-          <h4>Estado</h4>
-          <p style="font-size:13.5px; margin:0 0 14px;">${d.estado}</p>
-          <h4>Cronología</h4>
+        <div class="card">
+          <h3>Cronología</h3>
           <div class="timeline">
             <div class="timeline-item">
               <div class="ti-date">${formatDate(d.fecha)}</div>
@@ -1799,17 +1900,35 @@ function openDetail(id){
             </div>
           </div>
         </div>
-        <div class="aside-card">
-          <h4>Acciones rápidas</h4>
-          <button class="btn" style="width:100%; margin-bottom:6px;" onclick="alert('Demo: ver sentencia original')">📄 Sentencia original (PDF)</button>
-          <button class="btn" style="width:100%; margin-bottom:6px;" onclick="alert('Demo: ver casos similares')">🔍 Casos similares</button>
-          <button class="btn" style="width:100%;" onclick="goSearch()">← Volver al buscador</button>
+
+        <div class="card">
+          <h3>Acciones rápidas</h3>
+          <div style="display:flex; flex-wrap:wrap; gap:8px;">
+            <button class="btn" onclick="alert('Demo: ver sentencia original')">📄 Sentencia original (PDF)</button>
+            <button class="btn" onclick="alert('Demo: ver casos similares')">🔍 Casos similares</button>
+            <button class="btn" onclick="closeDetail()">← Volver al listado</button>
+          </div>
         </div>
-      </aside>
+      </div>
     </div>
   `;
-  showView('detail');
+
+  document.getElementById('detailDrawer').classList.add('open');
+  document.getElementById('detailBackdrop').classList.add('open');
+  document.body.style.overflow = 'hidden';
 }
+
+/* =============== CERRAR DRAWER =============== */
+function closeDetail(){
+  document.getElementById('detailDrawer').classList.remove('open');
+  document.getElementById('detailBackdrop').classList.remove('open');
+  document.body.style.overflow = '';
+}
+document.addEventListener('keydown', (e)=>{
+  if(e.key === 'Escape' && document.getElementById('detailDrawer').classList.contains('open')){
+    closeDetail();
+  }
+});
 
 /* =============== HELPERS =============== */
 function formatDate(s){
@@ -1822,14 +1941,29 @@ function formatMoney(n){
 }
 function abbrev(s, max){ return s && s.length>max ? s.slice(0,max)+'…' : s; }
 
-/* =============== HOME RECIENTES =============== */
-function renderRecent(){
-  const recent = [...DATA].sort((a,b)=>b.fecha.localeCompare(a.fecha)).slice(0,5);
-  let html = '';
-  recent.forEach(d=>{
-    const tipoLabel = d.tipo === 'casacion' ? 'CASACIÓN CNJ' : 'INSTANCIA';
-    html += `
-      <div class="result-card is-${d.tipo}" onclick="openDetail(${d.id})">
+/* =============== HOME: TABS POR CORTE / TRIBUNAL =============== */
+const HOME_TAB_FILTERS = {
+  cnj:        { label:"Corte Nacional de Justicia", match:(d)=> d.tipo==='casacion' },
+  quito:      { label:"TDCT con sede en Quito",       match:(d)=> /Quito/i.test(d.tribunal) },
+  guayaquil:  { label:"TDCT con sede en Guayaquil",   match:(d)=> /Guayaquil/i.test(d.tribunal) },
+  cuenca:     { label:"TDCT con sede en Cuenca",      match:(d)=> /Cuenca/i.test(d.tribunal) },
+  portoviejo: { label:"TDCT con sede en Portoviejo",  match:(d)=> /Portoviejo/i.test(d.tribunal) }
+};
+
+function updateHomeTabCounts(){
+  Object.keys(HOME_TAB_FILTERS).forEach(key=>{
+    const count = DATA.filter(HOME_TAB_FILTERS[key].match).length;
+    const el = document.getElementById(`cnt-${key}`);
+    if(el) el.textContent = count;
+  });
+}
+
+function resultCardHTML(d){
+  const tipoLabel = d.tipo === 'casacion' ? 'CASACIÓN CNJ' : 'INSTANCIA';
+  const dcode = decisionCodeMeta(d);
+  return `
+    <div class="result-card is-${d.tipo}">
+      <div class="rc-body" onclick="openDetail(${d.id})" style="cursor:pointer;">
         <div class="rc-top">
           <div class="rc-badges">
             <span class="badge ${d.tipo}">${tipoLabel}</span>
@@ -1843,18 +1977,65 @@ function renderRecent(){
         <div class="rc-preview">${(d.antecedentes||'').slice(0,200)}…</div>
         <div class="rc-foot">
           <div class="rc-meta">
+            <span><strong>Tribunal:</strong> ${abbrev(d.tribunal,36)}</span>
             <span><strong>Cuantía:</strong> ${formatMoney(d.cuantia)}</span>
             <span><strong>Acción:</strong> ${d.accion}</span>
           </div>
-          <span class="rc-decision ${d.decisionTipo}">${d.decision}</span>
+          <div class="rc-foot-right">
+            <span class="rc-decision ${d.decisionTipo}">${d.decision}</span>
+            <div class="rc-dcode-group">
+              <button class="rc-dcode ${dcode.css}" data-tip="${dcode.tip}" onclick="event.stopPropagation(); openDetail(${d.id});" aria-label="${dcode.tip}">${dcode.code}</button>
+            </div>
+          </div>
         </div>
-      </div>`;
+      </div>
+    </div>`;
+}
+
+function decisionCodeMeta(d){
+  // Mapea al estilo de la app real:
+  //   Casación CNJ  -> C / NC (dorado)
+  //   Instancia     -> CL / SL / P (violeta)
+  //   Inadmisión    -> IN (gris)
+  if(d.tipo === 'casacion'){
+    if(d.decisionTipo === 'acepta')   return { code:'C',  css:'casacion',  tip:'Casa la sentencia' };
+    if(d.decisionTipo === 'niega')    return { code:'NC', css:'casacion',  tip:'No casa la sentencia' };
+    if(d.decisionTipo === 'inadmite') return { code:'IN', css:'inadmite',  tip:'Inadmite el recurso' };
+    return { code:'P', css:'casacion', tip:d.decision||'Decisión parcial' };
+  }
+  // instancia
+  if(d.decisionTipo === 'acepta')   return { code:'CL', css:'instancia', tip:'Con lugar · '+(d.decision||'Acepta') };
+  if(d.decisionTipo === 'niega')    return { code:'SL', css:'instancia', tip:'Sin lugar · '+(d.decision||'Niega') };
+  if(d.decisionTipo === 'parcial')  return { code:'P',  css:'instancia', tip:'Parcial · '+(d.decision||'Acepta parcialmente') };
+  if(d.decisionTipo === 'inadmite') return { code:'IN', css:'inadmite',  tip:'Inadmite' };
+  return { code:'·', css:'pendiente', tip:d.decision||'Pendiente' };
+}
+
+function renderHomeTab(key){
+  const cfg = HOME_TAB_FILTERS[key];
+  const list = DATA
+    .filter(cfg.match)
+    .sort((a,b)=> b.fecha.localeCompare(a.fecha))
+    .slice(0, 6);
+
+  const box = document.getElementById('tabContent');
+  if(list.length === 0){
+    box.innerHTML = `<div class="tab-empty">Aún no hay sentencias emitidas recientemente por ${cfg.label} en esta muestra.</div>`;
+    return;
+  }
+  box.innerHTML = list.map(resultCardHTML).join('');
+}
+
+function showHomeTab(key){
+  document.querySelectorAll('#homeTabs .home-tab').forEach(b=>{
+    b.classList.toggle('active', b.dataset.key === key);
   });
-  document.getElementById('recentList').innerHTML = html;
+  renderHomeTab(key);
 }
 
 /* =============== INIT =============== */
-renderRecent();
+updateHomeTabCounts();
+showHomeTab('cnj');
 applyFilters();
 </script>
 
