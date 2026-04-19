@@ -265,11 +265,11 @@
   .field-row .dash{ color:var(--muted); font-size:11px; }
 
   .search-box{ position:relative; }
-  .search-box input{ padding-left:28px; }
   .search-box::before{
-    content:"🔍"; position:absolute; left:8px; top:50%;
-    transform:translateY(-50%); font-size:11px; opacity:.5;
+    content:"🔍"; position:absolute; left:10px; top:50%; transform:translateY(-50%);
+    font-size:12px; opacity:.55; pointer-events:none;
   }
+  .search-box input{ padding-left:28px; }
 
   .cat-header{
     font-size:11px; font-weight:600; color:var(--ink);
@@ -493,50 +493,74 @@
   .proto-banner span{ background:#000; color:var(--primary-500); padding:2px 8px; border-radius:4px; font-size:10px; margin-right:8px; letter-spacing:1px; }
 
   /* =========================================================
-     DRAWER DE DETALLE (panel lateral superpuesto)
+     CATEGORÍAS COMO PROTAGONISTAS (hero en la cabecera)
      ========================================================= */
-  .detail-backdrop{
-    position:fixed; inset:0;
-    background:rgba(0,0,0,0.42);
-    z-index:80;
-    opacity:0; pointer-events:none;
-    transition:opacity .25s ease;
+  .cats-hero{
+    display:flex; flex-wrap:wrap; gap:8px; align-items:center;
+    margin:14px 0 4px;
   }
-  .detail-backdrop.open{ opacity:1; pointer-events:auto; }
+  .cats-hero-label{
+    font-size:10.5px; letter-spacing:1.5px; font-weight:700;
+    color:var(--muted); text-transform:uppercase; margin-right:2px;
+  }
+  .cat-chip{
+    display:inline-flex; align-items:center; gap:6px;
+    padding:6px 12px; border-radius:999px;
+    background:var(--primary-100); color:var(--primary-800);
+    font-size:12.5px; font-weight:700; letter-spacing:.1px;
+    border:1px solid var(--primary-300);
+  }
+  .cat-chip.child{
+    background:#fff; color:var(--ink); border:1px solid var(--line);
+    font-weight:600;
+  }
+  .cat-chip .dot{ width:6px; height:6px; border-radius:999px; background:var(--primary-600); }
+  .cat-chip.child .dot{ background:var(--muted); }
 
-  .detail-drawer{
-    position:fixed; top:0; right:0; bottom:0;
-    width:min(760px, 60vw);
-    background:#fff;
-    z-index:90;
-    box-shadow:-16px 0 48px rgba(0,0,0,0.18);
-    transform:translateX(100%);
-    transition:transform .32s cubic-bezier(.4,0,.2,1);
-    overflow-y:auto;
+  /* =========================================================
+     RESUMEN COMO PROTAGONISTA (card destacada arriba del detalle)
+     ========================================================= */
+  .resumen-card{
+    background:linear-gradient(180deg, var(--primary-50), #fff);
+    border:1px solid var(--primary-300);
+    border-left:4px solid var(--primary-500);
+    border-radius:12px; padding:18px 22px; margin:14px 0 18px;
   }
-  .detail-drawer.open{ transform:translateX(0); }
-  .drawer-head{
-    position:sticky; top:0; z-index:3;
-    background:#fff;
-    padding:14px 22px;
-    border-bottom:1px solid var(--line);
-    display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  .resumen-card .r-label{
+    font-size:10.5px; letter-spacing:1.5px; font-weight:700;
+    color:var(--primary-800); text-transform:uppercase;
+    display:flex; align-items:center; gap:6px; margin-bottom:8px;
   }
-  .drawer-close{
-    background:#fff; border:1px solid var(--line); border-radius:8px;
-    padding:7px 12px; font-size:13px; font-weight:500; color:var(--ink);
-    cursor:pointer; display:inline-flex; align-items:center; gap:6px;
-    transition:all .2s;
+  .resumen-card .r-text{
+    font-size:14.5px; line-height:1.6; color:var(--ink); margin:0;
   }
-  .drawer-close:hover{ background:var(--primary-50); border-color:var(--primary-500); }
-  .drawer-crumb{ font-size:12.5px; color:var(--muted); flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
-  .drawer-crumb strong{ color:var(--ink); font-family:'JetBrains Mono','SF Mono','Courier New',monospace; }
-  .drawer-body{ padding:22px 24px 48px; }
-  .drawer-body .detail-grid{ grid-template-columns:1fr; }
-  .drawer-body .aside-card{ position:static; }
+  .resumen-card .r-foot{
+    display:flex; flex-wrap:wrap; gap:16px; margin-top:12px;
+    font-size:12.5px; color:var(--muted); padding-top:10px;
+    border-top:1px dashed var(--primary-300);
+  }
+  .resumen-card .r-foot strong{ color:var(--ink); font-weight:600; }
 
-  @media (max-width:900px){
-    .detail-drawer{ width:100vw; }
+  /* =========================================================
+     DETALLE — CABECERA DESTACADA (Variante A)
+     ========================================================= */
+  .detail-head{
+    background:linear-gradient(180deg, var(--primary-50), #fff);
+  }
+  .detail-head .h1-title{
+    font-family:'Inter', system-ui, sans-serif;
+    font-size:24px; line-height:1.25; font-weight:700;
+    color:var(--secondary); margin:6px 0 4px; letter-spacing:0;
+  }
+  .detail-head .h1-causa{
+    font-family:'JetBrains Mono','SF Mono','Courier New',monospace;
+    font-size:13px; font-weight:600; color:var(--muted);
+    letter-spacing:.5px; margin:0 0 6px;
+  }
+  .side-label{
+    margin:0 0 8px; font-size:11.5px; text-transform:uppercase;
+    letter-spacing:1.5px; color:var(--muted); font-weight:600;
+    display:flex; align-items:center; gap:6px;
   }
 
   /* =========================================================
@@ -600,6 +624,89 @@
     background:#fff; border:1px dashed var(--line); border-radius:10px;
     padding:28px; text-align:center; color:var(--muted); font-size:13.5px;
   }
+
+  /* ==========================================================
+     HOME: CTA grande + estado bloqueado (preview sin login)
+     ========================================================== */
+  .hero-cta-wrap{ margin:30px auto 8px; display:flex; flex-direction:column; align-items:center; gap:10px; }
+  .hero-cta{
+    display:inline-flex; align-items:center; justify-content:center;
+    padding:18px 44px;
+    background:var(--secondary); color:var(--primary-500);
+    border:2px solid var(--secondary);
+    border-radius:10px;
+    font-size:17px; font-weight:700; letter-spacing:1px;
+    text-transform:uppercase;
+    cursor:pointer;
+    transition:all .2s ease;
+    box-shadow:0 8px 24px rgba(0,0,0,0.18);
+    min-width:280px;
+  }
+  .hero-cta:hover{
+    background:var(--primary-500); color:var(--secondary);
+    border-color:var(--primary-500);
+    transform:translateY(-2px);
+    box-shadow:0 12px 32px rgba(226,188,52,0.35);
+  }
+  .hero-cta:focus-visible{ outline:3px solid var(--primary-700); outline-offset:3px; }
+  .hero-cta-note{
+    font-size:12.5px; color:var(--muted);
+    margin:0; letter-spacing:.2px;
+  }
+
+  .hero-chips.is-locked button[disabled]{
+    opacity:.45; cursor:not-allowed; pointer-events:none;
+    background:#f6f3ea; border-color:#e9e2cc; color:#8a7f5a;
+  }
+
+  .entities.is-locked .entity-card.locked{
+    position:relative; cursor:not-allowed;
+  }
+  .entity-card.locked .entity-links a.is-locked{
+    pointer-events:none; color:#9c9689; background:transparent;
+    opacity:.62;
+  }
+  .entity-card.locked:hover{ transform:none; box-shadow:0 1px 3px rgba(0,0,0,0.04); }
+  .entity-card.locked::after{
+    content:"Inicia sesión para abrir"; position:absolute;
+    top:14px; right:14px;
+    font-size:10.5px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
+    color:var(--primary-800);
+    background:var(--primary-50);
+    border:1px solid var(--primary-500);
+    padding:4px 10px; border-radius:999px;
+  }
+
+  .locked-hint{
+    display:inline-block; margin-left:6px;
+    font-size:12px; font-weight:600; letter-spacing:.3px;
+    color:var(--primary-800);
+  }
+
+  .locked-cta-row{
+    margin-top:28px; padding:26px;
+    background:linear-gradient(135deg, var(--primary-50), #fff);
+    border:1px solid var(--primary-500);
+    border-radius:14px;
+    display:flex; align-items:center; justify-content:center; gap:20px;
+    flex-wrap:wrap; text-align:center;
+  }
+  .locked-cta-row .hero-cta{ min-width:260px; padding:14px 32px; font-size:15px; }
+  .locked-cta-hint{ font-size:13.5px; color:var(--ink); max-width:460px; }
+
+  #tabContent.is-preview-locked .result-card{
+    pointer-events:none; opacity:.8; filter:saturate(.9);
+    position:relative;
+  }
+  #tabContent.is-preview-locked .result-card::after{
+    content:"Vista previa"; position:absolute;
+    top:10px; right:12px;
+    font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase;
+    color:var(--primary-800);
+    background:var(--primary-50);
+    border:1px solid var(--primary-500);
+    padding:3px 8px; border-radius:999px;
+  }
 </style>
 </head>
 <body>
@@ -651,16 +758,20 @@
       <span class="hero-eyebrow">Jurisprudencia tributaria del Ecuador</span>
       <h1>La inteligencia jurídica <span>empieza con la sentencia correcta</span></h1>
       <p>Busca, compara y descarga sentencias de casación y de instancia del contencioso tributario. Base depurada y actualizada del SRI, SENAE y GADs.</p>
-      <div class="hero-search">
-        <input id="heroInput" type="text" placeholder="Ej: devolución IVA exportador, reclamo administrativo, determinación tributaria…" />
-        <button onclick="runHeroSearch()">Buscar</button>
+
+      <div class="hero-cta-wrap">
+        <button class="hero-cta" onclick="goSearch()" aria-label="Entrar al buscador">
+          Entrar al buscador
+        </button>
+        <p class="hero-cta-note">Acceso con usuario y contraseña · Sesión activa</p>
       </div>
-      <div class="hero-chips">
+
+      <div class="hero-chips is-locked" aria-hidden="true">
         <span>Populares:</span>
-        <button onclick="runHeroSearchTerm('pago indebido')">pago indebido</button>
-        <button onclick="runHeroSearchTerm('determinación')">determinación</button>
-        <button onclick="runHeroSearchTerm('recurso de revisión')">recurso de revisión</button>
-        <button onclick="runHeroSearchTerm('acción coactiva')">acción coactiva</button>
+        <button disabled tabindex="-1">pago indebido</button>
+        <button disabled tabindex="-1">determinación</button>
+        <button disabled tabindex="-1">recurso de revisión</button>
+        <button disabled tabindex="-1">acción coactiva</button>
       </div>
     </div>
   </div>
@@ -676,56 +787,61 @@
     <div class="section-head">
       <div>
         <h2>Explora por entidad tributaria</h2>
-        <p>Accede directamente a las materias más consultadas por cada autoridad.</p>
+        <p>Accede directamente a las materias más consultadas por cada autoridad. <span class="locked-hint">Requiere inicio de sesión.</span></p>
       </div>
     </div>
-    <div class="entities">
+    <div class="entities is-locked">
 
-      <div class="entity-card">
+      <div class="entity-card locked">
         <div class="entity-head">
           <h3>SRI</h3>
           <span class="count">2,847 causas</span>
         </div>
         <div class="entity-links">
-          <a onclick="openSearch({entidad:'SRI', categoria:'Pago indebido'})">Pago indebido<span class="arrow">→</span></a>
-          <a onclick="openSearch({entidad:'SRI', categoria:'Recurso de revisión'})">Recurso de revisión<span class="arrow">→</span></a>
-          <a onclick="openSearch({entidad:'SRI', categoria:'Determinación'})">Determinación<span class="arrow">→</span></a>
-          <a onclick="openSearch({entidad:'SRI', categoria:'Reclamos administrativos'})">Reclamos administrativos<span class="arrow">→</span></a>
-          <a onclick="openSearch({entidad:'SRI', categoria:'Impuesto a la renta'})">Impuesto a la renta<span class="arrow">→</span></a>
-          <a class="ver-todos" onclick="openSearch({entidad:'SRI'})">Ver todas las causas del SRI →</a>
+          <a class="is-locked">Pago indebido<span class="arrow">→</span></a>
+          <a class="is-locked">Recurso de revisión<span class="arrow">→</span></a>
+          <a class="is-locked">Determinación<span class="arrow">→</span></a>
+          <a class="is-locked">Reclamos administrativos<span class="arrow">→</span></a>
+          <a class="is-locked">Impuesto a la renta<span class="arrow">→</span></a>
+          <a class="ver-todos is-locked">Ver todas las causas del SRI →</a>
         </div>
       </div>
 
-      <div class="entity-card">
+      <div class="entity-card locked">
         <div class="entity-head">
           <h3>SENAE</h3>
           <span class="count">1,528 causas</span>
         </div>
         <div class="entity-links">
-          <a onclick="openSearch({entidad:'SENAE', categoria:'Determinación'})">Determinación<span class="arrow">→</span></a>
-          <a onclick="openSearch({entidad:'SENAE', categoria:'Reclamo de pago indebido'})">Reclamo de pago indebido<span class="arrow">→</span></a>
-          <a onclick="openSearch({entidad:'SENAE', categoria:'Procedimientos sancionatorios'})">Procedimientos sancionatorios<span class="arrow">→</span></a>
-          <a onclick="openSearch({entidad:'SENAE', categoria:'Controles aduaneros'})">Controles aduaneros<span class="arrow">→</span></a>
-          <a onclick="openSearch({entidad:'SENAE', categoria:'Extinción de obligaciones'})">Extinción de obligaciones<span class="arrow">→</span></a>
-          <a class="ver-todos" onclick="openSearch({entidad:'SENAE'})">Ver todas las causas del SENAE →</a>
+          <a class="is-locked">Determinación<span class="arrow">→</span></a>
+          <a class="is-locked">Reclamo de pago indebido<span class="arrow">→</span></a>
+          <a class="is-locked">Procedimientos sancionatorios<span class="arrow">→</span></a>
+          <a class="is-locked">Controles aduaneros<span class="arrow">→</span></a>
+          <a class="is-locked">Extinción de obligaciones<span class="arrow">→</span></a>
+          <a class="ver-todos is-locked">Ver todas las causas del SENAE →</a>
         </div>
       </div>
 
-      <div class="entity-card">
+      <div class="entity-card locked">
         <div class="entity-head">
           <h3>GADs</h3>
           <span class="count">849 causas</span>
         </div>
         <div class="entity-links">
-          <a onclick="openSearch({entidad:'GADS', categoria:'Acción coactiva'})">Acción coactiva<span class="arrow">→</span></a>
-          <a onclick="openSearch({entidad:'GADS', categoria:'Extinción de obligaciones'})">Extinción de obligaciones<span class="arrow">→</span></a>
-          <a onclick="openSearch({entidad:'GADS', categoria:'Impuesto de patentes'})">Impuesto de patentes<span class="arrow">→</span></a>
-          <a onclick="openSearch({entidad:'GADS', categoria:'Determinación'})">Determinación<span class="arrow">→</span></a>
-          <a onclick="openSearch({entidad:'GADS', categoria:'Impuesto uno por mil'})">Impuesto uno por mil<span class="arrow">→</span></a>
-          <a class="ver-todos" onclick="openSearch({entidad:'GADS'})">Ver todas las causas de GADs →</a>
+          <a class="is-locked">Acción coactiva<span class="arrow">→</span></a>
+          <a class="is-locked">Extinción de obligaciones<span class="arrow">→</span></a>
+          <a class="is-locked">Impuesto de patentes<span class="arrow">→</span></a>
+          <a class="is-locked">Determinación<span class="arrow">→</span></a>
+          <a class="is-locked">Impuesto uno por mil<span class="arrow">→</span></a>
+          <a class="ver-todos is-locked">Ver todas las causas de GADs →</a>
         </div>
       </div>
 
+    </div>
+
+    <div class="locked-cta-row">
+      <button class="hero-cta" onclick="goSearch()">Entrar al buscador</button>
+      <span class="locked-cta-hint">Inicia sesión para activar los filtros y los enlaces de cada entidad.</span>
     </div>
   </div>
 
@@ -733,9 +849,8 @@
     <div class="section-head">
       <div>
         <h2>Últimas sentencias emitidas</h2>
-        <p>Ordenadas por fecha de emisión del juez. Filtra por Corte Nacional o Tribunal Distrital.</p>
+        <p>Ordenadas por fecha de emisión del juez. Filtra por Corte Nacional o Tribunal Distrital. <span class="locked-hint">Vista previa · Requiere inicio de sesión para abrirlas.</span></p>
       </div>
-      <button class="btn" onclick="goSearch()">Ver todas →</button>
     </div>
 
     <div class="home-tabs" id="homeTabs">
@@ -756,7 +871,12 @@
       </button>
     </div>
 
-    <div id="tabContent"></div>
+    <div id="tabContent" class="is-preview-locked"></div>
+
+    <div class="locked-cta-row">
+      <button class="hero-cta" onclick="goSearch()">Entrar al buscador</button>
+      <span class="locked-cta-hint">Accede con tu cuenta para abrir cualquier sentencia y usar los filtros avanzados.</span>
+    </div>
   </div>
 
 </section>
@@ -764,16 +884,12 @@
 <!-- ==========================================================
      DRAWER: DETALLE (side-panel overlay)
      ========================================================== -->
-<div class="detail-backdrop" id="detailBackdrop" onclick="closeDetail()"></div>
-<aside class="detail-drawer" id="detailDrawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle">
-  <div class="drawer-head">
-    <button class="drawer-close" onclick="closeDetail()" aria-label="Cerrar detalle">
-      ← Volver
-    </button>
-    <div class="drawer-crumb" id="drawerCrumb"></div>
-  </div>
-  <div class="drawer-body" id="drawerBody"><!-- JS popula --></div>
-</aside>
+<!-- ==========================================================
+     VIEW: DETALLE DE SENTENCIA (Variante A — página completa)
+     ========================================================== -->
+<section id="view-detail" class="view">
+  <div class="detail-shell" id="detailShell"><!-- JS popula --></div>
+</section>
 
 <!-- ==========================================================
      VIEW: BUSCADOR
@@ -1716,7 +1832,7 @@ function renderChips(){
   if(chips.length === 0){ box.innerHTML = ''; return; }
   let html = '<span class="lbl">Filtros activos:</span>';
   chips.forEach(c=>{
-    html += `<span class="chip">${c.lbl}<button onclick="removeChip('${c.k}','${c.val||''}')">✕</button></span>`;
+    html += `<span class="chip">${c.lbl}<button onclick="removeChip('${c.k}','${c.val||''}')" aria-label="Quitar filtro">✕</button></span>`;
   });
   html += `<button class="btn" style="font-size:11.5px; padding:4px 10px; margin-left:6px;" onclick="clearFilters(true)">Limpiar todo</button>`;
   box.innerHTML = html;
@@ -1771,7 +1887,7 @@ function renderResults(list){
   const box = document.getElementById('resultsList');
   if(list.length === 0){
     box.innerHTML = `<div class="no-results">
-      <div style="font-size:36px;">🔍</div>
+      <div style="font-size:32px; opacity:.45; margin-bottom:6px;">🔍</div>
       <h3>Sin resultados</h3>
       <p>Ajusta los filtros para ampliar tu búsqueda.</p>
       <button class="btn" style="margin-top:10px;" onclick="clearFilters(true)">Limpiar filtros</button>
@@ -1782,54 +1898,89 @@ function renderResults(list){
 }
 
 /* =============== DETALLE =============== */
+/* =============== RESUMEN AUTOGENERADO (si la data no lo trae) =============== */
+function buildResumen(d){
+  if(d.resumen) return d.resumen;
+  const actor = (d.recurrentes && d.recurrentes[0]) ? d.recurrentes[0] : 'El contribuyente';
+  const accionTxt = d.tipo === 'casacion'
+    ? `interpuso recurso de casación ante la CNJ`
+    : `presentó acción contencioso-tributaria ante el ${d.tribunal.replace('Tribunal Distrital de lo Contencioso Tributario con sede en ','TDCT ')}`;
+  const efecto = {
+    acepta:   'El Tribunal aceptó la pretensión',
+    niega:    'El Tribunal rechazó la pretensión',
+    parcial:  'El Tribunal aceptó parcialmente la pretensión',
+    inadmite: 'El Tribunal declaró inadmisible el recurso',
+    pendiente:'La causa se encuentra en trámite'
+  }[d.decisionTipo] || 'El Tribunal emitió sentencia';
+  const antecedCorto = (d.antecedentes || '').split('.').slice(0,2).join('.') + '.';
+  return `${actor} ${accionTxt} contra el ${d.entidad} por la materia de <strong>${d.categoria}${d.subcat?` — ${d.subcat}`:''}</strong>. ${antecedCorto} ${efecto} (<strong>${d.decision}</strong>), por una cuantía de <strong>${formatMoney(d.cuantia)}</strong>.`;
+}
+
+/* =============== CATEGORÍAS DEL CASO (chips jerárquicos) =============== */
+function buildCatChips(d){
+  const parent = `<span class="cat-chip"><span class="dot"></span>${d.categoria}</span>`;
+  const child  = d.subcat ? `<span class="cat-chip child"><span class="dot"></span>${d.subcat}</span>` : '';
+  const accion = d.accion && d.accion !== d.categoria
+    ? `<span class="cat-chip child"><span class="dot"></span>${d.accion}</span>` : '';
+  const causales = (d.causales||[]).slice(0,1).map(c=>`<span class="cat-chip child"><span class="dot"></span>${c}</span>`).join('');
+  return `
+    <div class="cats-hero">
+      <span class="cats-hero-label">🏷️ Materias</span>
+      ${parent}${child}${accion}${causales}
+    </div>`;
+}
+
+/* =============== ABRIR DETALLE (Variante A — página completa) =============== */
 function openDetail(id){
   const d = DATA.find(x=>x.id===id); if(!d) return;
-  const tipoLabel = d.tipo === 'casacion' ? 'CASACIÓN CNJ' : 'INSTANCIA';
+  const tipoLabel = d.tipo === 'casacion' ? 'CASACIÓN CNJ' : 'INSTANCIA · TDCT';
   const decisionBox = `<div class="decision-box ${d.decisionTipo}">${d.decision}</div>`;
+  const tribCorto = d.tribunal.replace('Tribunal Distrital de lo Contencioso Tributario con sede en ','TDCT ').replace('Sala Especializada de lo Contencioso Tributario de la CNJ','CNJ · Sala Contencioso Tributario');
 
   let partesHtml = '';
-  d.recurrentes.forEach(r=>{ partesHtml += `<div class="info-row"><div class="k">Parte recurrente</div><div class="v">${r}</div></div>`;});
-  partesHtml += `<div class="info-row"><div class="k">Administración tributaria</div><div class="v">${d.entidad}</div></div>`;
+  d.recurrentes.forEach(r=>{ partesHtml += `<div class="info-row"><div class="k">${d.tipo==='casacion'?'Parte recurrente':'Parte actora'}</div><div class="v">${r}</div></div>`;});
+  partesHtml += `<div class="info-row"><div class="k">${d.tipo==='casacion'?'Administración':'Entidad demandada'}</div><div class="v">${d.entidad}</div></div>`;
 
   let causalHtml = '';
   if(d.causales && d.causales.length){
     causalHtml = `<div class="card"><h3>Causales invocadas</h3><div class="pill-list">${d.causales.map(c=>`<span class="pill">${c}</span>`).join('')}</div></div>`;
   }
-
   let jurHtml = '';
   if(d.jurisprudencia && d.jurisprudencia.length){
-    jurHtml = `<div class="card"><h3>Jurisprudencia mencionada</h3><ul>${d.jurisprudencia.map(j=>`<li>${j}</li>`).join('')}</ul></div>`;
+    jurHtml = `<div class="card"><h3>📚 Jurisprudencia mencionada</h3><ul>${d.jurisprudencia.map(j=>`<li>${j}</li>`).join('')}</ul></div>`;
   }
-
-  let votoHtml = '';
-  if(d.votoSalvadoJuez){
-    votoHtml = `<div class="card"><h3>Voto salvado — ${d.votoSalvadoJuez}</h3><p>${d.votoSalvadoArg}</p></div>`;
-  }
-
   let medidasHtml = '';
   if(d.medidas){
-    medidasHtml = `<div class="card"><h3>Medidas adicionales</h3><p>${d.medidas}</p></div>`;
+    medidasHtml = `<div class="card"><h3>📐 Medidas adicionales</h3><p>${d.medidas}</p></div>`;
   }
   let obsHtml = '';
   if(d.observaciones){
-    obsHtml = `<div class="card"><h3>Observaciones</h3><p>${d.observaciones}</p></div>`;
+    obsHtml = `<div class="card"><h3>📌 Observaciones</h3><p>${d.observaciones}</p></div>`;
   }
 
-  document.getElementById('drawerCrumb').innerHTML =
-    `<strong>${d.juicio}</strong> · ${d.entidad} · ${formatDate(d.fecha)}`;
+  document.getElementById('detailShell').innerHTML = `
+    <div class="crumb" style="margin-bottom:12px;">
+      🏠 <a onclick="goHome()">Inicio</a> / 🔍 <a onclick="closeDetail()">Buscador</a> / <strong>${d.juicio}</strong>
+      <span style="flex:1;"></span>
+      <button class="btn" onclick="closeDetail()">← Volver al listado</button>
+    </div>
 
-  document.getElementById('drawerBody').innerHTML = `
     <div class="detail-head">
-      <div style="display:flex; gap:8px; margin-bottom:8px; flex-wrap:wrap;">
+      <div style="display:flex; gap:8px; margin-bottom:4px; flex-wrap:wrap;">
         <span class="badge ${d.tipo}">${tipoLabel}</span>
         <span class="badge entidad">${d.entidad}</span>
       </div>
-      <h1 id="drawerTitle" style="margin:4px 0 10px; font-size:22px; line-height:1.3;">${d.juicio}</h1>
-      <div class="detail-meta">
-        <span><strong>📅</strong> ${formatDate(d.fecha)}</span>
-        <span><strong>⚖️</strong> ${d.tribunal}</span>
-        <span><strong>💰</strong> ${formatMoney(d.cuantia)}</span>
-        <span><strong>📋</strong> ${d.estado}</span>
+      <div class="h1-causa">📋 Causa ${d.juicio}</div>
+      <h1 class="h1-title">${(d.recurrentes&&d.recurrentes[0])||'Contribuyente'} vs. ${d.entidad}</h1>
+
+      ${buildCatChips(d)}
+
+      <div class="detail-meta" style="margin-top:14px;">
+        <span>📅 <strong>Fecha:</strong> ${formatDate(d.fecha)}</span>
+        <span>⚖️ <strong>Tribunal:</strong> ${tribCorto}</span>
+        <span>💰 <strong>Cuantía:</strong> ${formatMoney(d.cuantia)}</span>
+        <span>🏁 <strong>Decisión:</strong> ${d.decision}</span>
+        <span>🏛️ <strong>Estado:</strong> ${d.estado}</span>
       </div>
       <div class="detail-actions">
         <button class="btn primary" onclick="alert('Demo: descarga DOCX')">⬇ Descargar Word</button>
@@ -1841,13 +1992,18 @@ function openDetail(id){
 
     <div class="detail-grid">
       <div>
-        <div class="card">
-          <h3>Decisión final</h3>
-          ${decisionBox}
+        <div class="resumen-card">
+          <div class="r-label">📝 Resumen del caso</div>
+          <p class="r-text">${buildResumen(d)}</p>
+          <div class="r-foot">
+            <span>🎯 <strong>Tipo de acción:</strong> ${d.accion}</span>
+            <span>👤 <strong>${d.tipo==='casacion'?'Ponente':'Juez sustanciador'}:</strong> ${d.juez}</span>
+            <span>🏛️ <strong>Estado:</strong> ${d.estado}</span>
+          </div>
         </div>
 
         <div class="card">
-          <h3>Partes del proceso</h3>
+          <h3>👥 Partes del proceso</h3>
           ${partesHtml}
           <div class="info-row"><div class="k">Tipo de acción</div><div class="v">${d.accion}</div></div>
           <div class="info-row"><div class="k">Categoría</div><div class="v"><span class="pill">${d.categoria}</span> ${d.subcat?`<span class="pill violet">${d.subcat}</span>`:''}</div></div>
@@ -1857,37 +2013,43 @@ function openDetail(id){
         </div>
 
         <div class="card">
-          <h3>Antecedentes</h3>
+          <h3>📖 Antecedentes</h3>
           <p>${d.antecedentes}</p>
         </div>
 
         ${causalHtml}
 
         <div class="card">
-          <h3>Argumentos del recurrente</h3>
+          <h3>⚖️ Argumentos del recurrente</h3>
           <p>${d.argRecurrente}</p>
         </div>
 
         <div class="card">
-          <h3>Argumentos de la contraparte</h3>
+          <h3>🛡️ Argumentos de la contraparte</h3>
           <p>${d.argContraparte}</p>
         </div>
 
         <div class="card">
-          <h3>Criterio de la Sala para resolver</h3>
+          <h3>💡 Criterio de la Sala para resolver</h3>
           <p>${d.criterio}</p>
         </div>
 
         ${jurHtml}
-        ${votoHtml}
         ${medidasHtml}
         ${obsHtml}
+      </div>
 
-        <div class="card">
-          <h3>Cronología</h3>
+      <aside>
+        <div class="aside-card">
+          <div class="side-label">🏁 Decisión final</div>
+          ${decisionBox}
+          ${d.medidas?`<div class="side-label">📐 Medidas</div><p style="font-size:13px; margin:0 0 14px; color:var(--ink);">${d.medidas}</p>`:''}
+          <div class="side-label">🏛️ Estado</div>
+          <p style="font-size:13px; margin:0 0 16px; color:var(--ink);">${d.estado}</p>
+          <div class="side-label">🧭 Cronología</div>
           <div class="timeline">
             <div class="timeline-item">
-              <div class="ti-date">${formatDate(d.fecha)}</div>
+              <div class="ti-date">📅 ${formatDate(d.fecha)}</div>
               <div class="ti-text">Sentencia emitida</div>
             </div>
             <div class="timeline-item">
@@ -1900,32 +2062,25 @@ function openDetail(id){
             </div>
           </div>
         </div>
-
-        <div class="card">
-          <h3>Acciones rápidas</h3>
-          <div style="display:flex; flex-wrap:wrap; gap:8px;">
-            <button class="btn" onclick="alert('Demo: ver sentencia original')">📄 Sentencia original (PDF)</button>
-            <button class="btn" onclick="alert('Demo: ver casos similares')">🔍 Casos similares</button>
-            <button class="btn" onclick="closeDetail()">← Volver al listado</button>
-          </div>
+        <div class="aside-card" style="position:static;">
+          <div class="side-label">⚡ Acciones rápidas</div>
+          <button class="btn" style="width:100%; margin-bottom:6px;" onclick="alert('Demo: ver sentencia original')">📄 Sentencia original (PDF)</button>
+          <button class="btn" style="width:100%; margin-bottom:6px;" onclick="alert('Demo: casos similares')">🔍 Casos similares</button>
+          <button class="btn" style="width:100%;" onclick="closeDetail()">← Volver al buscador</button>
         </div>
-      </div>
+      </aside>
     </div>
   `;
 
-  document.getElementById('detailDrawer').classList.add('open');
-  document.getElementById('detailBackdrop').classList.add('open');
-  document.body.style.overflow = 'hidden';
+  showView('detail');
 }
 
-/* =============== CERRAR DRAWER =============== */
+/* =============== CERRAR DETALLE (vuelve al buscador) =============== */
 function closeDetail(){
-  document.getElementById('detailDrawer').classList.remove('open');
-  document.getElementById('detailBackdrop').classList.remove('open');
-  document.body.style.overflow = '';
+  showView('search');
 }
 document.addEventListener('keydown', (e)=>{
-  if(e.key === 'Escape' && document.getElementById('detailDrawer').classList.contains('open')){
+  if(e.key === 'Escape' && state.view === 'detail'){
     closeDetail();
   }
 });
